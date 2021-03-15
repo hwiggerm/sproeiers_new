@@ -77,6 +77,7 @@ void setup() {
 
   blink_oke();
   tkstatus = true;
+  zkstatus = false ;
 
   server.on("/", handle_onconnect);
   server.on("/zwembadon", handle_zwembadklep_on);
@@ -132,12 +133,14 @@ void handle_onconnect() {
 
 void handle_zwembadklep_on() {
   zkstatus = true ;
+  tkstatus = false ;
   Serial.println("Zwembadklep Status: ON");
   server.send(200, "text/html", SendHTML(true,zkstatus)); 
 }
 
 void handle_tuinklep_on() {
   tkstatus = true;
+  zkstatus = false ;
   Serial.println("Tuinklep Status: ON");
   server.send(200, "text/html", SendHTML(true,tkstatus)); 
 }
@@ -170,7 +173,7 @@ void stop(){
 
 void voeding_aan(){
   digitalWrite(power_pin,HIGH);
-  delay(100)
+  delay(100);
   Serial.println("voeding : ON");
 }
 
