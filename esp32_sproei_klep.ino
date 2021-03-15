@@ -7,7 +7,6 @@
 
 /*
 https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/
-test
 */
 
 /*Put your SSID & Password*/
@@ -147,11 +146,6 @@ void handle_power_off(){
   pwrstatus = false;
   Serial.println("Power: OFF");
   server.send(200, "text/html", SendHTML(true,pwrstatus)); 
-}
-
-void handle_temperature(){
-  Serial.println("Get Temperature");
-  server.send(200, "text/html", SendHTML(true,0)); 
 }
 
 void handle_NotFound(){
