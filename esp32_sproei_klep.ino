@@ -22,8 +22,8 @@ bool zkstatus = LOW;
 uint8_t tuin_klep_pin = 22;
 bool tkstatus = LOW;
 
-uint8_t relais_pin = 21;
-bool rstatus = LOW;
+uint8_t power_pin = 21;
+bool pwrstatus = LOW;
 
 void setup() {
   Serial.begin(115200);
@@ -31,7 +31,7 @@ void setup() {
   delay(100);
   pinMode(zwembad_klep_pin, OUTPUT);
   pinMode(tuin_klep_pin, OUTPUT);
-  pinMode(relais_pin, OUTPUT);
+  pinMode(power_pin, OUTPUT);
   pinMode(ONBOARD_LED, OUTPUT);
   
   Serial.println("Connecting to ");
@@ -80,10 +80,9 @@ void setup() {
 
   server.on("/", handle_onconnect);
   server.on("/zwembadon", handle_zwembadklep_on);
-  server.on("/zwembadoff", handle_zwembadklep_off);
   server.on("/tuinon", handle_tuinklep_on);
-  server.on("/tuinoff", handle_tuinklep_off);
-  server.on("/temperatuur", handle_temperature);
+  server.on("/poweroff", handle_power_off);
+  
   server.onNotFound(handle_NotFound);
   
   server.begin();
@@ -94,31 +93,41 @@ void setup() {
 void loop() {
   server.handleClient();
   /*code responinf on requests*/
-   if(zkstatus)
-  {digitalWrite(zwembad_klep_pin, HIGH);}
+  if(zkstatus)
+  { 
+    voeding_aan()
+    digitalWrite(zwembad_klep_pin, HIGH);
+    digitalWrite(tuin_klep_pin, LOW);
+  }
   else
-  {digitalWrite(zwembad_klep_pin, LOW);}
+  { 
+    voeding_aan()
+    digitalWrite(zwembad_klep_pin, LOW);
+    digitalWrite(tuin_klep_pin, HIGH);
+  }
   
   if(tkstatus)
-  {digitalWrite(tuin_klep_pin, HIGH);}
+  {
+    voeding_aan()
+    digitalWrite(tuin_klep_pin, HIGH);
+    digitalWrite(zwembad_klep_pin, LOW);
+    }
   else
-  {digitalWrite(tuin_klep_pin, LOW);}
+  {
+    voeding_aan()
+    digitalWrite(tuin_klep_pin, LOW);
+    digitalWrite(zwembad_klep_pin, HIGH);
+  }
 }
 
 void handle_onconnect() {
   Serial.println("Connected");
-  server.send(200, "text/html", SendHTML(true, rstatus )); 
+  server.send(200, "text/html", SendHTML(true, pwrstatus )); 
 }
 
 void handle_zwembadklep_on() {
   zkstatus = true ;
   Serial.println("Zwembadklep Status: ON");
-  server.send(200, "text/html", SendHTML(true,zkstatus)); 
-}
-
-void handle_zwembadklep_off(){
-  zkstatus = false;
-  Serial.println("Zwembadklep Status: OFF");
   server.send(200, "text/html", SendHTML(true,zkstatus)); 
 }
 
@@ -128,10 +137,16 @@ void handle_tuinklep_on() {
   server.send(200, "text/html", SendHTML(true,tkstatus)); 
 }
 
-void handle_tuinklep_off(){
-  tkstatus = false;
-  Serial.println("Tuinklep Status: OFF");
-  server.send(200, "text/html", SendHTML(true,tkstatus)); 
+void handle_power_on(){
+  pwrstatus = true;
+  Serial.println("Power: ON");
+  server.send(200, "text/html", SendHTML(true,pwrstatus)); 
+}
+
+void handle_power_off(){
+  pwrstatus = false;
+  Serial.println("Power: OFF");
+  server.send(200, "text/html", SendHTML(true,pwrstatus)); 
 }
 
 void handle_temperature(){
@@ -154,12 +169,13 @@ void stop(){
 }
 
 void voeding_aan(){
-  digitalWrite(relais_pin,HIGH);
+  digitalWrite(power_pin,HIGH);
+  delay(100)
   Serial.println("voeding : ON");
 }
 
 void voeding_uit(){
-  digitalWrite(relais_pin,LOW);
+  digitalWrite(power_pin,LOW);
   Serial.println("voeding : OFF");
 }
 
