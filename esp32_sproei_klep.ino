@@ -76,6 +76,7 @@ void setup() {
   voeding_uit();
 
   blink_oke();
+  tkstatus = true;
 
   server.on("/", handle_onconnect);
   server.on("/zwembadon", handle_zwembadklep_on);
@@ -94,26 +95,31 @@ void loop() {
   /*code responinf on requests*/
   if(zkstatus)
   { 
-    voeding_aan()
+ power_pin;
+    digitalWrite(power_pin, HIGH);
+    delay(100);
     digitalWrite(zwembad_klep_pin, HIGH);
     digitalWrite(tuin_klep_pin, LOW);
   }
   else
   { 
-    voeding_aan()
+    digitalWrite(power_pin, HIGH);
+    delay(100);
     digitalWrite(zwembad_klep_pin, LOW);
     digitalWrite(tuin_klep_pin, HIGH);
   }
   
   if(tkstatus)
   {
-    voeding_aan()
+    digitalWrite(power_pin, HIGH);
+    delay(100);
     digitalWrite(tuin_klep_pin, HIGH);
     digitalWrite(zwembad_klep_pin, LOW);
     }
   else
   {
-    voeding_aan()
+    digitalWrite(power_pin, HIGH);
+    delay(100);
     digitalWrite(tuin_klep_pin, LOW);
     digitalWrite(zwembad_klep_pin, HIGH);
   }
