@@ -103,8 +103,6 @@ void loop() {
   //listen an handle given instruction
 
   server.handleClient();
-  if (tkstatus) { returncode = 201; }
-  if (zkstatus) { returncode = 202; }
   // if (pwrstatus) { returncode = 205; }
 
   //only set kleppen when power is on
@@ -119,12 +117,14 @@ void loop() {
     //when true; flip zwembad on and 1 sec later tuin off if not flip tuin on and zwembad off
     { 
       digitalWrite(zwembad_klep_pin, HIGH);
+      returncode = 202;
       delay(1000);
       digitalWrite(tuin_klep_pin, LOW);
     }
     else
     { 
       digitalWrite(tuin_klep_pin, HIGH);
+      returncode = 201;
       delay(1000);
       digitalWrite(zwembad_klep_pin, LOW);
     }
@@ -133,12 +133,14 @@ void loop() {
     if(tkstatus)
       {
         digitalWrite(tuin_klep_pin, HIGH);
+        returncode = 201;
         delay(1000);
         digitalWrite(zwembad_klep_pin, LOW);
       }
     else
       {
         digitalWrite(zwembad_klep_pin, HIGH);
+        returncode = 202;
         delay(1000);
         digitalWrite(tuin_klep_pin, LOW);
       }
@@ -149,6 +151,7 @@ void loop() {
   //keep power low as we are on powerdown
   { 
     digitalWrite(power_pin, LOW);
+    returncode = 203;
     delay(100);
   }
 }
