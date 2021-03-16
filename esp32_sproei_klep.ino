@@ -24,6 +24,9 @@ bool tkstatus = true;
 uint8_t power_pin = 21;
 bool pwrstatus = true;
 
+
+int returncode = 404 ;
+
 // setup the system
 void setup() {
   Serial.begin(115200);
@@ -83,6 +86,7 @@ void setup() {
   
  //identify instructions and actions
   server.on("/", handle_onconnect);
+  server.on("/status", handle_status);
   server.on("/zwembadon", handle_zwembadklep_on);
   server.on("/tuinon", handle_tuinklep_on);
   server.on("/poweroff", handle_power_off);
@@ -99,7 +103,9 @@ void loop() {
   //listen an handle given instruction
 
   server.handleClient();
-  
+  if (tkstatus) { returncode = 201; }
+  if (zkstatus) { returncode = 202; }
+  // if (pwrstatus) { returncode = 205; }
 
   //only set kleppen when power is on
   if(pwrstatus)
@@ -151,32 +157,40 @@ void loop() {
 
 //functions responding on webserver instructions
 
+void handle_status() {
+  Serial.println("Status");
+
+  server.send(returncode, "text/plain", "oke" ); 
+}
+
 void handle_onconnect() {
   Serial.println("Connected");
-  server.send(200, "text/html", SendHTML(true, pwrstatus )); 
+  server.send(returncode, "text/html", SendHTML(true, pwrstatus )); 
 }
 
 void handle_zwembadklep_on() {
   pwrstatus = true ;
   zkstatus = true ;
   tkstatus = false ;
+  if (zkstatus) { returncode = 201; }
   Serial.println("Zwembadklep Status: ON");
-  server.send(200, "text/html", SendHTML(true,zkstatus)); 
+  server.send(returncode, "text/html", SendHTML(true,zkstatus)); 
 }
 
 void handle_tuinklep_on() {
   pwrstatus = true ;
   tkstatus = true;
   zkstatus = false ;
+  if (tkstatus) { returncode = 201; }
   Serial.println("Tuinklep Status: ON");
   // server.send(200, "text/html", SendHTML(true,tkstatus)); 
-  server.send(200, "text/html", SendHTML(true,'Tuinklep')); 
+  server.send(returncode, "text/html", SendHTML(true,'Tuinklep')); 
 }
 
 void handle_power_on(){
   pwrstatus = true;
   Serial.println("Power: ON");
-  server.send(200, "text/html", SendHTML(true,pwrstatus)); 
+  server.send(returncode, "text/html", SendHTML(true,pwrstatus)); 
 }
 
 void handle_power_off(){
@@ -189,7 +203,7 @@ void handle_power_off(){
   zkstatus = false ;
   
   Serial.println("Power: OFF");
-  server.send(200, "text/html", SendHTML(true,pwrstatus)); 
+  server.send(returncode, "text/html", SendHTML(true,pwrstatus)); 
 }
 
 void handle_NotFound(){
