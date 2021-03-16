@@ -2,28 +2,29 @@
 #include <WiFi.h>
 #include <WebServer.h>
 
-#define ONBOARD_LED  2
 
 
-/*
-https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/
-*/
 
-/*Put your SSID & Password*/
+/*set the key parameters */
+
+// internet connection 
 const char* ssid = "Dorskamp";
 const char* password = "46498342";
-
 WebServer server(80);
 
+
+// GPIO Pins 21/22/23 
+#define ONBOARD_LED  2
 uint8_t zwembad_klep_pin = 23;
 bool zkstatus = false;
 
 uint8_t tuin_klep_pin = 22;
-bool tkstatus = false;
+bool tkstatus = true;
 
 uint8_t power_pin = 21;
 bool pwrstatus = true;
 
+// setup the system
 void setup() {
   Serial.begin(115200);
 
@@ -33,10 +34,10 @@ void setup() {
   pinMode(power_pin, OUTPUT);
   pinMode(ONBOARD_LED, OUTPUT);
   
+// connect to dorskamp using a fixed iP
   Serial.println("Connecting to ");
   Serial.println(ssid);
 
-  //connect to your local wi-fi network
   WiFi.begin(ssid, password);
   IPAddress ip(10,0,0,141);   
   IPAddress gateway(10,0,0,1);   
@@ -44,25 +45,27 @@ void setup() {
   WiFi.config(ip, gateway, subnet);
   int connectcount = 0;
 
-  //check wi-fi is connected to wi-fi network
+  //check wi-fi is connected to wi-fi network if not stop the program
   while (WiFi.status() != WL_CONNECTED) {
   delay(1000);
   
   connectcount = connectcount + 1 ;
    if (connectcount == 10) {
-      /* na 10 poningen geven we verbindingen op */
+      //stop after 10 attempts to connect
       stop();
    }
   
   }
   
+  //connected
   Serial.println("");
   Serial.println("WiFi connected..!");
   Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
 
-  /* test de voeding en de kleppen */
+  // check power and kleppen
   voeding_aan();
 
+  //play sequence to check the components
   zwembadklep_aan();
   delay(2000);
   zwembadklep_uit();
@@ -75,33 +78,39 @@ void setup() {
 
   voeding_uit();
 
+  //confirm checks are done
   blink_oke();
-  tkstatus = true;
-  zkstatus = false ;
-
+  
+ //identify instructions and actions
   server.on("/", handle_onconnect);
   server.on("/zwembadon", handle_zwembadklep_on);
   server.on("/tuinon", handle_tuinklep_on);
   server.on("/poweroff", handle_power_off);
-  
   server.onNotFound(handle_NotFound);
   
+  //start the webserver 
   server.begin();
   Serial.println("HTTP server started");
 }
 
-
+// run the program
 void loop() {
+
+  //listen an handle given instruction
+
   server.handleClient();
-  /*code responinf on requests*/
   
+
+  //only set kleppen when power is on
   if(pwrstatus)
   { 
+      //always switch/leve power on (to be sure) untill swithched off
       digitalWrite(power_pin, HIGH);
       delay(1000);
 
-
     if(zkstatus)
+    //zwembad
+    //when true; flip zwembad on and 1 sec later tuin off if not flip tuin on and zwembad off
     { 
       digitalWrite(zwembad_klep_pin, HIGH);
       delay(1000);
@@ -113,7 +122,8 @@ void loop() {
       delay(1000);
       digitalWrite(zwembad_klep_pin, LOW);
     }
-  
+    //tuin 
+    //when true; flip tuin on and 1 sec later zwembad off if not flip zwembad on and tuin off
     if(tkstatus)
       {
         digitalWrite(tuin_klep_pin, HIGH);
@@ -129,6 +139,8 @@ void loop() {
   }
 
   else
+
+  //keep power low as we are on powerdown
   { 
     digitalWrite(power_pin, LOW);
     delay(100);
@@ -137,9 +149,7 @@ void loop() {
 
 
 
-
-
-
+//functions responding on webserver instructions
 
 void handle_onconnect() {
   Serial.println("Connected");
@@ -159,7 +169,8 @@ void handle_tuinklep_on() {
   tkstatus = true;
   zkstatus = false ;
   Serial.println("Tuinklep Status: ON");
-  server.send(200, "text/html", SendHTML(true,tkstatus)); 
+  // server.send(200, "text/html", SendHTML(true,tkstatus)); 
+  server.send(200, "text/html", SendHTML(true,'Tuinklep')); 
 }
 
 void handle_power_on(){
@@ -182,9 +193,8 @@ void handle_power_off(){
 }
 
 void handle_NotFound(){
-  server.send(404, "text/plain", "Not found");
+  server.send(404, "text/plain", "Instruction Not found");
 }
-
 
 void stop(){
  while(1){
