@@ -13,13 +13,9 @@ klepstatus = 'status'
 tuinklep = 'zwembadon'
 zwembklep = 'tuinon'
 
-
-#init
-
 #
 # check of er een verbinding is anders stoppen 
 #
-
 
 def connect(host):
 	try:
@@ -30,7 +26,6 @@ def connect(host):
 	except:
         	return 404
 
-# test
 
 alive = connect(sproeiklep+klepstatus) 
 if alive == 404:
@@ -39,15 +34,19 @@ else:
 	print('Connected and feeling fine, status ' + str(alive))
 time.sleep(5)
 
+
+print('set tuinklep = 201')
 tk = connect(sproeiklep+tuinklep)
 print ("klepcode :", str(tk))
 time.sleep(5)
 
-
+print('set zwembadklep = 202')
 tk = connect(sproeiklep+zwembklep)
 print ("klepcode :", str(tk))
-time.sleep(2)
+time.sleep(5)
 
+
+print('------')
 
 tempin = getdht.read_temp()
 o = getowmweather.read_weather()
@@ -55,9 +54,4 @@ o = getowmweather.read_weather()
 print(tempin)
 print('---')
 print(o['weather'])
-
-
-
-
-
 
