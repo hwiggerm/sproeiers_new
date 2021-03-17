@@ -108,9 +108,9 @@ void loop() {
   //only set kleppen when power is on
   if(pwrstatus)
   { 
-      //always switch/leve power on (to be sure) untill swithched off
-      digitalWrite(power_pin, HIGH);
-      delay(1000);
+    //always switch/leve power on (to be sure) untill swithched off
+    digitalWrite(power_pin, HIGH);
+    delay(1000);
 
     if(zkstatus)
     //zwembad
@@ -156,13 +156,10 @@ void loop() {
   }
 }
 
-
-
 //functions responding on webserver instructions
 
 void handle_status() {
   Serial.println("Status");
-
   server.send(returncode, "text/plain", "oke" ); 
 }
 
@@ -175,7 +172,7 @@ void handle_zwembadklep_on() {
   pwrstatus = true ;
   zkstatus = true ;
   tkstatus = false ;
-  if (zkstatus) { returncode = 201; }
+
   Serial.println("Zwembadklep Status: ON");
   server.send(returncode, "text/html", SendHTML(true,zkstatus)); 
 }
@@ -184,10 +181,9 @@ void handle_tuinklep_on() {
   pwrstatus = true ;
   tkstatus = true;
   zkstatus = false ;
-  if (tkstatus) { returncode = 201; }
+
   Serial.println("Tuinklep Status: ON");
-  // server.send(200, "text/html", SendHTML(true,tkstatus)); 
-  server.send(returncode, "text/html", SendHTML(true,'Tuinklep')); 
+  server.send(returncode, "text/html", SendHTML(true,tkstatus)); 
 }
 
 void handle_power_on(){
@@ -202,9 +198,10 @@ void handle_power_off(){
   digitalWrite(zwembad_klep_pin,LOW);
   
   pwrstatus = false ;
-  tkstatus = true ;
+  tkstatus = false ;
   zkstatus = false ;
   
+  returncode = 210
   Serial.println("Power: OFF");
   server.send(returncode, "text/html", SendHTML(true,pwrstatus)); 
 }
@@ -263,16 +260,6 @@ void blink_oke(){
       digitalWrite(ONBOARD_LED,LOW);
 }
 
-void blink_error(){
-      digitalWrite(ONBOARD_LED,HIGH);
-      delay(1000);
-      digitalWrite(ONBOARD_LED,LOW);
-      delay(100);
-      digitalWrite(ONBOARD_LED,HIGH);
-      delay(1000);
-      digitalWrite(ONBOARD_LED,LOW);
-}
-
 String SendHTML(uint8_t led1stat,uint8_t led2stat){
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
@@ -290,20 +277,5 @@ String SendHTML(uint8_t led1stat,uint8_t led2stat){
   ptr +="<body>\n";
   ptr +="<h1>ESP32 Sprinkler Control</h1>\n";
   ptr +="<h3>Listening to your commands</h3>\n";
-  
- /* if(tkstatus)
-  {ptr +="<p>Tuin Klep Status: ON</p><a class=\"button button-off\" href=\"/zwembadoff\">OFF</a>\n";}
-  else
-  {ptr +="<p>LED1 Status: OFF</p><a class=\"button button-on\" href=\"/zwembadon\">ON</a>\n";}
-
-  if(zkstatus)
-  {ptr +="<p>LED2 Status: ON</p><a class=\"button button-off\" href=\"/tuinoff\">OFF</a>\n";}
-  else
-  {ptr +="<p>LED2 Status: OFF</p><a class=\"button button-on\" href=\"/tuinon\">ON</a>\n";}
-
-  ptr +="</body>\n";
-  ptr +="</html>\n";
-  */
-  
   return ptr;
 }
