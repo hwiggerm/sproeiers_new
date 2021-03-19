@@ -17,14 +17,14 @@ def openvalve(sproeiklep,klepstatus):
 	# first check if the swithc can be reached
 	alive = connect(sproeiklep + '/status') 
 	if alive == 404:
-		print('Connect Error')
+		#print('Connect Error')
 		return(false)
 	else:
-		print('Connected and feeling fine, status ' + str(alive))
+		#print('Connected and feeling fine, status ' + str(alive))
 		time.sleep(5)
 
 	print('set ' + sproeiklep )
 	valve = connect(sproeiklep + klepstatus)
-	print ("valve status :", str(valve))
+	#print ("valve status :", str(valve))
 	time.sleep(5)
 	return(valve)
