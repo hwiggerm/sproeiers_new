@@ -2,18 +2,6 @@
 import os
 import sys
 import urllib.request
-import time
-
-
-from library.sensors import getdht
-from library.sensors import getowmweather
-
-sproeiklep =  'http://10.0.0.141/'
-klepstatus = 'status'
-tuinklep = 'zwembadon'
-zwembklep = 'tuinon'
-
-
 
 def connect(host):
 	try:
@@ -27,7 +15,7 @@ def connect(host):
 def openvalve(sproeiklep,klepstatus):
 	
 	# first check if the swithc can be reached
-	alive = connect(sproeiklep,status) 
+	alive = connect(sproeiklep + '/status') 
 	if alive == 404:
 		print('Connect Error')
 		return(false)
@@ -36,7 +24,7 @@ def openvalve(sproeiklep,klepstatus):
 		time.sleep(5)
 
 	print('set ' + sproeiklep )
-	valve = connect(sproeiklep,klepstatus)
+	valve = connect(sproeiklep + klepstatus)
 	print ("valve status :", str(valve))
 	time.sleep(5)
 	return(valve)
