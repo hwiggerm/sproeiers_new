@@ -19,10 +19,10 @@ def openvalve(sproeiklep,klepstatus):
 	alive = connect(sproeiklep+ 'status') 
 
 	if alive == '404':
-		print('Connect Error')
+		#print('Connect Error')
 		return(False)
 	else:
-		print('Connected and feeling fine, status ' + str(alive))
+		#print('Connected and feeling fine, status ' + str(alive))
 
 	commando = sproeiklep + klepstatus
 	valve = connect(commando)
