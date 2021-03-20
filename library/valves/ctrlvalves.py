@@ -23,7 +23,6 @@ def openvalve(sproeiklep,klepstatus):
 		return(False)
 	else:
 		#print('Connected and feeling fine, status ' + str(alive))
-
-	commando = sproeiklep + klepstatus
-	valve = connect(commando)
-	return(valve)
+		commando = sproeiklep + klepstatus
+		valve = connect(commando)
+		return(valve)
