@@ -8,6 +8,10 @@ from library.valves import ctrlvalves
 from library.valves import ctrlpump
 from library.core import logger
 
+from library.sensors import getdht
+from library.sensors import getowmweather
+
+
 klepsysteem = 'http://10.0.0.141/'
 
 
@@ -32,12 +36,32 @@ sprinklersetup = False
 sprinklerstart = False
 sprinklerstop = False
 sprinklermid = False
+houraction = False
 
 sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
 sprinklerstoptime =dt.now()
 
 while True:
+    if alarm.hoursign():
+        if not houraction:
+            tempin = getdht.read_temp()
+            oweer = getowmweather.read_weather()
+
+            now = datetime.datetime.now()
+            nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
+
+            textline = nicetime + ";" + str(tempin) + ';' + oweer['outsidetemp'] + ";" + oweer['weather'] + ";" + oweer['rain1h'] + ";" + oweer['rain3h'] + "\n"
+            f = open("templogger.txt", "a")
+            f.write(textline)
+            f.close()
+
+            logger.writeline('Uur Melding '+textline)
+            houraction =  True
+    else:
+        houraction=False
+
+
     #plan the sprinkler time
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:

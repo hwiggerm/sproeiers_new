@@ -1,30 +1,24 @@
 #!/usr/bin/env python
-# from g import mymodule
 
+#import os
+#import glob
+
+import time
+import datetime
 from library.sensors import getdht
 from library.sensors import getowmweather
-#
-#	mymodule.greeting("Hans")
-#
-#	a = mymodule.person1["age"]
-#	print(a)
-#
-#
-#	b = mymodule.dicttest("1993")
-#	print(b)
-#	print(b['brand'])
-#
+
 
 tempin = getdht.read_temp()
-o = getowmweather.read_weather()
+oweer = getowmweather.read_weather()
 
-print(tempin)
-print('---')
-print(o)
-print(o['weather'])
+now = datetime.datetime.now()
+nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
 
-
-
+textline = nicetime + ";" + str(tempin) + oweer['outsidetemp'] + ";" + oweer['weather'] + ";" + oweer['rain1h'] + ";" + oweer['rain3h'] + "\n"
+f = open("templogger.txt", "a")
+f.write(textline)
+f.close()
 
 
 
