@@ -19,11 +19,13 @@ weather = observation.weather
 sunrise_iso = weather.sunrise_time(timeformat='date') 
 sunset_iso = weather.sunset_time(timeformat='date')
 
-timedelta = -4    #in hours -=+
+timedelta = -0   #in hours -=+
+mindelta  =  -50
+sproeitijd = 60 
 
 print('sunrise         :',sunrise_iso.time())
 
-sprinklersetuptime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=-20, seconds=0)).time()
+sprinklersetuptime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
 print('plan sprinklers. :',sprinklersetuptime)
 
 sprinklersetup = False
@@ -40,14 +42,19 @@ while True:
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
             print('Setup Sprinkler timing')
-            sprinklerstarttime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=-45, seconds=0)).time()
-            sprinklermidtime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=-47, seconds=0)).time()
-            sprinklerstoptime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=-49, seconds=0)).time()
+            sprinklerstarttime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
+            sprinklermidtime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta - (sproeitijd/2), seconds=0)).time()
+            sprinklerstoptime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta - sproeitijd, seconds=0)).time()
 
             print('sprinkeler start time :',sprinklerstarttime)
             print('sprinkeler mid time :',sprinklermidtime)
             print('sprinkeler stop time :',sprinklerstoptime)
             sprinklersetup = True
+
+            sprinklerstart = False
+            sprinklerstop = False
+            sprinklermid = False
+
     else:
         sprinklersetup = False
 
@@ -60,6 +67,7 @@ while True:
             if ctrlvalves.openvalve(klepsysteem,'tuinon'):
                 logger.writeline('Valve Switched tuin')
                 ctrlpump.pumpon()
+                logger.writeline('Pump On')
             else:
                 logger.writeline('Error in switching tuin')
 
@@ -84,11 +92,11 @@ while True:
     if alarm.alarmclock(sprinklerstoptime):
         if not sprinklerstop:
             print('Stop Sprinkler')
+            logger.writeline('Pump Off')
             ctrlpump.pumpoff()
-            #stop pump
-            #delay
-            sprinklerstop = True
+            #pause
 
+            sprinklerstop = True
             if ctrlvalves.openvalve(klepsysteem,'poweroff'):
                 logger.writeline('poweroff')
             else:
