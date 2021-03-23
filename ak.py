@@ -10,14 +10,17 @@ from library.core import logger
 
 from library.sensors import getdht
 from library.sensors import getowmweather
+import os
 
 
-klepsysteem = 'http://10.0.0.141/'
+klepsysteem = os.environ.get('KLEPSYSTEEM')
+owmkey =  os.environ.get('OWMAPI')
+geolocation = os.environ.get('GEOLOC')
 
 
-owm = OWM('8db099bc017e2ccd16cbbbacf0390e9f')
+owm = OWM(owmkey)
 mgr = owm.weather_manager()
-observation = mgr.weather_at_place('Wageningen,NL')
+observation = mgr.weather_at_place(geolocation)
 
 weather = observation.weather
 sunrise_iso = weather.sunrise_time(timeformat='date') 

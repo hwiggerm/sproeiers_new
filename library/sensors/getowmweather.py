@@ -2,11 +2,18 @@
 
 import glob
 from pyowm.owm import OWM
+import os
+
+owmkey =  os.environ.get('OWMAPI')
+geolocation = os.environ.get('GEOLOC')
+
+
+
 
 def read_weather():
-	owm = OWM('8db099bc017e2ccd16cbbbacf0390e9f')
+	owm = OWM(owmkey)
 	mgr = owm.weather_manager()
-	observation = mgr.weather_at_place('Wageningen,NL')
+	observation = mgr.weather_at_place(geolocation)
 	weather = observation.weather
 	rain_dict = weather.rain
 	temp_dict_celsius = weather.temperature('celsius')
