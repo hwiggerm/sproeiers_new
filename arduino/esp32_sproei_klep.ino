@@ -8,8 +8,8 @@
 /*set the key parameters */
 
 // internet connection 
-const char* ssid = "Dorskamp";
-const char* password = "46498342";
+const char* ssid = "xxxxx";
+const char* password = "xxxxx";
 WebServer server(80);
 
 
