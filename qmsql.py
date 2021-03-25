@@ -23,6 +23,7 @@ print('yesterday: ' + str(yesterday))
 
 v=0
 t=0
+tout=0
 h=0
 r=0
 
@@ -35,13 +36,15 @@ for x in myresult:
 
         t = t + float(x[1])
         h = h + float(x[4])
+        tout = tout + float(x[2])
 
         if x[5] != 'None':
             r = r + float(x[5])
 
 
-
+print('Number of measurements :' + str(v) )
 print('Average Tempin:' + str(t/v))
+print('Average Tempout:' + str(tout/v))
 print('Average Humidity :' + str(h/v))
 print('Rain :' + str(r) )
 

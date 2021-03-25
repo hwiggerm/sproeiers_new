@@ -17,6 +17,7 @@ klepsysteem = os.environ.get('KLEPSYSTEEM')
 owmkey =  os.environ.get('OWMAPI')
 geolocation = os.environ.get('GEOLOC')
 
+ctrlpump.portinit()
 
 owm = OWM(owmkey)
 mgr = owm.weather_manager()
@@ -48,14 +49,18 @@ sprinklerstoptime =dt.now()
 while True:
     if alarm.hoursign():
         if not houraction:
-            tempin = getdht.read_temp()
-            oweer = getowmweather.read_weather()
+            try:
+                tempin = getdht.read_temp()
+                oweer = getowmweather.read_weather()
 
-            now = datetime.datetime.now()
-            nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
+                now = datetime.datetime.now()
+                nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
 
-            mysqldb.storedata(nicetime, tempin, oweer)
-            houraction =  True
+                mysqldb.storedata(nicetime, tempin, oweer)
+                houracction = True
+
+            except:
+                houraction =  True
     else:
         houraction=False
 

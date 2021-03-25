@@ -7,10 +7,8 @@ def portinit():
 
 
 def pumpon():
-    portinit()
     GPIO.output(in1, True)
 
 def pumpoff():
-    portinit()
     GPIO.output(in1, False)
 
