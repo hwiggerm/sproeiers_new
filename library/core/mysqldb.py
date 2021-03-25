@@ -1,4 +1,6 @@
-import mysql.connector import datetime import os
+import mysql.connector 
+import datetime 
+import os
 
 mysqlun = os.environ.get('MYSQLUN')
 mysqlpw = os.environ.get('MYSQLPW')

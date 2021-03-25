@@ -1,18 +1,16 @@
 import RPi.GPIO as GPIO
+in1 = 16
+
+def portinit():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(in1, GPIO.OUT)
+
 
 def pumpon():
-    in1 = 16
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(in1, GPIO.OUT)
-    print('Pump on')
+    portinit()
     GPIO.output(in1, True)
-    GPIO.cleanup()
 
 def pumpoff():
-    in1=16
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(in1, GPIO.OUT)
-    print('Pump off')
+    portinit()
     GPIO.output(in1, False)
-    GPIO.cleanup()
 

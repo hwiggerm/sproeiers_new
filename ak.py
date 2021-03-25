@@ -55,12 +55,6 @@ while True:
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
 
             mysqldb.storedata(nicetime, tempin, oweer)
-
-            #textline = nicetime + ";" + str(tempin) + ';' + oweer['outsidetemp'] + ";" + oweer['weather'] + ";" + oweer['rain1h'] + ";" + oweer['rain3h'] + ";" + str(oweer['humidity'])
-            #f = open("templogger.txt", "a")
-            #f.write(textline)
-            #f.close()
-            #logger.writeline('Uur Melding '+textline)
             houraction =  True
     else:
         houraction=False
