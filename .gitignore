@@ -1,3 +1,5 @@
 weatherenv/*
 sproei.sh
+setenvfortest.sh  
+sproei.sh 
 __pycache__

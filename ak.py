@@ -7,7 +7,7 @@ from pyowm.owm import OWM
 from library.valves import ctrlvalves
 from library.valves import ctrlpump
 from library.core import logger
-
+from library.core import mysqldb
 from library.sensors import getdht
 from library.sensors import getowmweather
 import os
@@ -54,12 +54,13 @@ while True:
             now = datetime.datetime.now()
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
 
-            textline = nicetime + ";" + str(tempin) + ';' + oweer['outsidetemp'] + ";" + oweer['weather'] + ";" + oweer['rain1h'] + ";" + oweer['rain3h'] + "\n"
-            f = open("templogger.txt", "a")
-            f.write(textline)
-            f.close()
+            mysqldb.storedata(nicetime, tempin, oweer)
 
-            logger.writeline('Uur Melding '+textline)
+            #textline = nicetime + ";" + str(tempin) + ';' + oweer['outsidetemp'] + ";" + oweer['weather'] + ";" + oweer['rain1h'] + ";" + oweer['rain3h'] + ";" + str(oweer['humidity'])
+            #f = open("templogger.txt", "a")
+            #f.write(textline)
+            #f.close()
+            #logger.writeline('Uur Melding '+textline)
             houraction =  True
     else:
         houraction=False

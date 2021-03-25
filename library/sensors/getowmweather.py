@@ -11,26 +11,31 @@ geolocation = os.environ.get('GEOLOC')
 
 
 def read_weather():
-	owm = OWM(owmkey)
-	mgr = owm.weather_manager()
-	observation = mgr.weather_at_place(geolocation)
-	weather = observation.weather
-	rain_dict = weather.rain
-	temp_dict_celsius = weather.temperature('celsius')
+    owm = OWM(owmkey)
+    mgr = owm.weather_manager()
+    observation = mgr.weather_at_place(geolocation)
 
-	temp = str(temp_dict_celsius['temp'])
-	rainh1 = str(rain_dict.get('1h'))
-	rainh3 = str(rain_dict.get('3h'))
-	weatherstatus = weather.status
-	sunrise_iso = weather.sunrise_time(timeformat='iso')
-	sunrset_iso = weather.sunset_time(timeformat='iso')
+    one_call = mgr.one_call(lat=5.690168016538389, lon=51.97338909741969)
+    humidity = one_call.current.humidity
 
-	weather = {
- 		"outsidetemp": temp,
-  		"rain1h": rainh1,
-		"rain3h": rainh3,
-  		"weather": weatherstatus,
-		"sunset": sunrset_iso,
-		"sunrise": sunrise_iso }
+    weather = observation.weather
+    rain_dict = weather.rain
+    temp_dict_celsius = weather.temperature('celsius')
 
-	return(weather)
+    temp = str(temp_dict_celsius['temp'])
+    rainh1 = str(rain_dict.get('1h'))
+    rainh3 = str(rain_dict.get('3h'))
+    weatherstatus = weather.status
+    sunrise_iso = weather.sunrise_time(timeformat='iso')
+    sunrset_iso = weather.sunset_time(timeformat='iso')
+
+    weather = {
+        "outsidetemp": temp,
+        "rain1h": rainh1,
+        "rain3h": rainh3,
+        "weather": weatherstatus,
+        "sunset": sunrset_iso,
+        "sunrise": sunrise_iso,
+        "humidity": humidity }
+
+    return(weather)

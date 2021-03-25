@@ -22,7 +22,7 @@ def hoursign():
     ctime = dt.now()
     cmin = ctime.strftime("%M")
 
-    if cmin == "00":
+    if cmin == "42":
         alarm = True
     else:
         alarm = False
