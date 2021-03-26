@@ -44,23 +44,22 @@ houraction = False
 
 sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
-sprinklerstoptime =dt.now()
+sprinklerstoptime = dt.now()
 
 while True:
     if alarm.hoursign():
         if not houraction:
+            houraction = True 
+            now = datetime.datetime.now()
+            nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
+
             try:
+                logger.writeline('Get Weather at '+ nicetime)
                 tempin = getdht.read_temp()
                 oweer = getowmweather.read_weather()
-
-                now = datetime.datetime.now()
-                nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
-
                 mysqldb.storedata(nicetime, tempin, oweer)
-                houracction = True
-
             except:
-                houraction =  True
+                logger.writeline('Could not receive weatherinfo at '+ nicetime)
     else:
         houraction=False
 

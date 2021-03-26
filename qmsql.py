@@ -31,7 +31,7 @@ r=0
 for x in myresult:
     logdate = str(x[0])
     date_time_obj = datetime.datetime.strptime(logdate, '%Y-%m-%d %H:%M:%S')
-    if date_time_obj.date() == today:
+    if date_time_obj.date() == yesterday:
         v = v + 1
 
         t = t + float(x[1])

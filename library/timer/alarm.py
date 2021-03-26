@@ -3,11 +3,11 @@ from datetime import datetime as dt
 
 def alarmclock(alarmtime):
     alarm = False
-    shour = alarmtime.strftime("%I")
+    shour = alarmtime.strftime("%H")
     smin = alarmtime.strftime("%M")
 
     ctime = dt.now()
-    chour = ctime.strftime("%I")
+    chour = ctime.strftime("%H")
     cmin = ctime.strftime("%M")
 
     if shour == chour:
@@ -22,7 +22,7 @@ def hoursign():
     ctime = dt.now()
     cmin = ctime.strftime("%M")
 
-    if cmin == "42":
+    if cmin == "00":
         alarm = True
     else:
         alarm = False
