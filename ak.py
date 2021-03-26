@@ -49,11 +49,12 @@ sprinklerstoptime = dt.now()
 while True:
     if alarm.hoursign():
         if not houraction:
-            houraction = True 
             now = datetime.datetime.now()
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
-
+            time.sleep(10)
+            
             try:
+                houraction = True 
                 logger.writeline('Get Weather at '+ nicetime)
                 tempin = getdht.read_temp()
                 oweer = getowmweather.read_weather()
@@ -62,6 +63,7 @@ while True:
                 logger.writeline('Could not receive weatherinfo at '+ nicetime)
     else:
         houraction=False
+
 
 
     #plan the sprinkler time
