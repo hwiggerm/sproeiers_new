@@ -19,29 +19,13 @@ geolocation = os.environ.get('GEOLOC')
 
 ctrlpump.portinit()
 
-owm = OWM(owmkey)
-mgr = owm.weather_manager()
-observation = mgr.weather_at_place(geolocation)
-
-weather = observation.weather
-sunrise_iso = weather.sunrise_time(timeformat='date') 
-sunset_iso = weather.sunset_time(timeformat='date')
-
-timedelta = -0   #in hours -=+
-mindelta  =  -50
-sproeitijd = 60 
-
-print('sunrise         :',sunrise_iso.time())
-
-sprinklersetuptime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
-print('plan sprinklers. :',sprinklersetuptime)
-
 sprinklersetup = False
 sprinklerstart = False
 sprinklerstop = False
 sprinklermid = False
 houraction = False
 
+sprinklersetuptime = dt.now()
 sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
 sprinklerstoptime = dt.now()
@@ -49,11 +33,13 @@ sprinklerstoptime = dt.now()
 while True:
     if alarm.hoursign():
         if not houraction:
-            houraction = True 
+
             now = datetime.datetime.now()
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
+            time.sleep(10)
 
             try:
+                houraction = True 
                 logger.writeline('Get Weather at '+ nicetime)
                 tempin = getdht.read_temp()
                 oweer = getowmweather.read_weather()
@@ -67,16 +53,27 @@ while True:
     #plan the sprinkler time
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
+
+            timedelta =  0   #in hours -=+
+            mindelta  =  0
+            sproeitijd = 60
+
+            owm = OWM(owmkey)
+            mgr = owm.weather_manager()
+            observation = mgr.weather_at_place(geolocation)
+
+            weather = observation.weather
+            sunrise_iso = weather.sunrise_time(timeformat='date')
+            sunset_iso = weather.sunset_time(timeformat='date')
+
             print('Setup Sprinkler timing')
-            sprinklerstarttime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
+            sprinklerstarttime = ( sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
             sprinklermidtime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta - (sproeitijd/2), seconds=0)).time()
             sprinklerstoptime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta - sproeitijd, seconds=0)).time()
 
-            print('sprinkeler start time :',sprinklerstarttime)
-            print('sprinkeler mid time :',sprinklermidtime)
-            print('sprinkeler stop time :',sprinklerstoptime)
-            sprinklersetup = True
+            logger.writeline('sprinkeler start time : ' + str(sprinklerstarttime) + ' - sproeitijd : ' + str(sproeitijd )
 
+            sprinklersetup = True
             sprinklerstart = False
             sprinklerstop = False
             sprinklermid = False
