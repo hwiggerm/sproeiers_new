@@ -14,7 +14,6 @@ def storedata(timestamp,tempin, oweer):
     database=mysqldb,
     )
 
-
     mycursor = mydb.cursor()
 
     query ="INSERT INTO logweather(logdate, tempin, tempout, weather, humidity, rain1h, rain3h) VALUES (%s, %s, %s, %s, %s, %s, %s)"
@@ -23,4 +22,20 @@ def storedata(timestamp,tempin, oweer):
     mycursor.execute(query, values)
     mydb.commit()
 
+def storeweather(weer):
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user=mysqlun,
+    password=mysqlpw,
+    database=mysqldb,
+    )
+
+
+    mycursor = mydb.cursor()
+
+    query ="INSERT INTO weerinfo(timestamp, ytemp, yhum, yrain, ttemp, thum, train) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    values = (weer['logdate'],weer['ytemp'],weer['yhum'],weer['yrain'],weer['ttemp'],weer['thum'],weer['train'])
+
+    mycursor.execute(query, values)
+    mydb.commit()
 
