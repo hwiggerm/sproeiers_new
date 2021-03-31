@@ -31,12 +31,6 @@ sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
 sprinklerstoptime = dt.now()
 
-
-print('get weathersummary')
-weather = wfcst.summarize
-mysqldb.storeweather(weather)
-print(weather)
-
 while True:
     if alarm.hoursign():
         if not houraction:
@@ -60,6 +54,11 @@ while True:
     #plan the sprinkler time
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
+
+            logger,writeline('get weathersummary and forecast to store it in db')
+            weather = wfcst.summarize()
+            mysqldb.storeweather(weather)
+            print(weather)
 
             timedelta =  0   #in hours -=+
             mindelta  =  0

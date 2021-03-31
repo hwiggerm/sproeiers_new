@@ -1,5 +1,7 @@
 import mysql.connector
 import datetime
+import os 
+
 from datetime import date
 from datetime import timedelta
 from pyowm.owm import OWM
@@ -17,7 +19,7 @@ today = date.today()
 yesterday = today + timedelta(days = -1)
 print('today: '+ str(today))
 
-def summarize:
+def summarize():
   mysqlun = os.environ.get('MYSQLUN')
   mysqlpw = os.environ.get('MYSQLPW')
   mysqldb = os.environ.get('MYSQLDB')
@@ -38,14 +40,15 @@ def summarize:
     temp = one_call.forecast_hourly[hourcount].temperature()
     humid = one_call.forecast_hourly[hourcount].humidity
     rain = one_call.forecast_hourly[hourcount].rain
+
     if not rain:
       rainvalue = 0
     else:
-      rainvalue = rain
+      rainvalue = int(rain['1h'])
 
     tt = tt + int(temp['temp'])
     ht = ht + int(humid)
-    rt = rt + rainvalue 
+    rt = rt + rainvalue
 
   #what was the recorded weather yesterday
   mydb = mysql.connector.connect(
@@ -65,12 +68,13 @@ def summarize:
   t=0
   h=0
   r=0
-  
+  hourcountdb = 0
+
   for x in myresult:
     logdate = str(x[0])
     date_time_obj = datetime.datetime.strptime(logdate, '%Y-%m-%d %H:%M:%S')
     if date_time_obj.date() == yesterday:
-        hourcount = hourcount + 1
+        hourcountdb = hourcountdb + 1
 
         t = t + float(x[2])
         h = h + float(x[4])
@@ -80,8 +84,8 @@ def summarize:
 
   weather = {
     "logdate": str(today),
-    "ytemp": t/v,
-    "yhum": h/v,
+    "ytemp": t/hourcountdb,
+    "yhum": h/hourcountdb,
     "yrain": r,
     "ttemp": tt/hourcount,
     "thum": ht/hourcount,
