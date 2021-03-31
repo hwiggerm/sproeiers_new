@@ -10,6 +10,7 @@ from library.core import logger
 from library.core import mysqldb
 from library.sensors import getdht
 from library.sensors import getowmweather
+from library.sensors import wfcst
 import os
 
 
@@ -29,6 +30,12 @@ sprinklersetuptime = dt.now()
 sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
 sprinklerstoptime = dt.now()
+
+
+print('get weathersummary')
+weather = wfcst.summarize
+mysqldb.storeweather(weather)
+print(weather)
 
 while True:
     if alarm.hoursign():
