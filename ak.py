@@ -40,7 +40,7 @@ while True:
             time.sleep(10)
 
             try:
-                houraction = True 
+                houraction = True
                 logger.writeline('Get Weather at '+ nicetime)
                 tempin = getdht.read_temp()
                 oweer = getowmweather.read_weather()
@@ -55,10 +55,9 @@ while True:
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
 
-            logger,writeline('get weathersummary and forecast to store it in db')
-            weather = wfcst.summarize()
-            mysqldb.storeweather(weather)
-            print(weather)
+            logger.writeline('get weathersummary and forecast to store it in db')
+            weathersummary = wfcst.summarize()
+            mysqldb.storeweather(weathersummary)
 
             timedelta =  0   #in hours -=+
             mindelta  =  0
@@ -72,7 +71,7 @@ while True:
             sunrise_iso = weather.sunrise_time(timeformat='date')
             sunset_iso = weather.sunset_time(timeformat='date')
 
-            print('Setup Sprinkler timing')
+            logger.writeline('Setup Sprinkler timing')
             sprinklerstarttime = ( sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
             sprinklermidtime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta - (sproeitijd/2), seconds=0)).time()
             sprinklerstoptime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta - sproeitijd, seconds=0)).time()
@@ -90,7 +89,7 @@ while True:
     #start the sprinkler
     if alarm.alarmclock(sprinklerstarttime):
         if not sprinklerstart:
-            print('Start Sprinkler')
+            logger.writelinet('Start Sprinkler')
             sprinklerstart = True
 
             if ctrlvalves.openvalve(klepsysteem,'tuinon'):

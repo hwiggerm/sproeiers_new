@@ -9,6 +9,7 @@ export GEOLOC='Wageningen, NL'
 export MYSQLUN='meteo'
 export MYSQLPW='regendruppel'
 export MYSQLDB='weather'
-
+export GEOLON='5.690168016538389'
+export GEOLAT='51.97338909741969'
 
 nohup python ak.py &

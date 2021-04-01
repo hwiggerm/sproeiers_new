@@ -10,10 +10,12 @@ from pyowm.owm import OWM
 
 owmkey =  os.environ.get('OWMAPI')
 geolocation = os.environ.get('GEOLOC')
+geolat = os.environ.get('GEOLAT')
+geolon = os.environ.get('GEOLON')
 
 owm = OWM(owmkey)
 mgr = owm.weather_manager()
-one_call = mgr.one_call(lat=51.970001, lon=5.66667, exclude='minutely', units='metric')
+one_call = mgr.one_call(lat=float(geolat), lon=float(geolon), exclude='minutely', units='metric')
 
 today = date.today()
 yesterday = today + timedelta(days = -1)
@@ -44,10 +46,10 @@ def summarize():
     if not rain:
       rainvalue = 0
     else:
-      rainvalue = int(rain['1h'])
+      rainvalue = float(rain['1h'])
 
-    tt = tt + int(temp['temp'])
-    ht = ht + int(humid)
+    tt = tt + float(temp['temp'])
+    ht = ht + float(humid)
     rt = rt + rainvalue
 
   #what was the recorded weather yesterday
