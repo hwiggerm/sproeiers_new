@@ -37,7 +37,7 @@ while True:
 
             now = datetime.datetime.now()
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
-            time.sleep(10)
+            time.sleep(1)
 
             try:
                 houraction = True

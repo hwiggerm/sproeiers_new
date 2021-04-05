@@ -15,7 +15,7 @@ def read_weather():
         owm = OWM(owmkey)
         mgr = owm.weather_manager()
         observation = mgr.weather_at_place(geolocation)
-        one_call = mgr.one_call(lat=GEOLAT, lon=GEOLON)
+        one_call = mgr.one_call(lat=float(geolat), lon=float(geolon))
 
         humidity = one_call.current.humidity
         weather = observation.weather
