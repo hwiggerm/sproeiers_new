@@ -85,7 +85,7 @@ while True:
               "sproeitijd": sproeitijd,
               "sunrise": sunrise_iso  }
         
-            weather.update(updweather)
+            weathersummary.update(updweather)
 
             mysqldb.storeweather(weathersummary)
 
