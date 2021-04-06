@@ -33,8 +33,8 @@ def storeweather(weer):
 
     mycursor = mydb.cursor()
 
-    query ="INSERT INTO weerinfo(timestamp, ytemp, yhum, yrain, ttemp, thum, train) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    values = (weer['logdate'],weer['ytemp'],weer['yhum'],weer['yrain'],weer['ttemp'],weer['thum'],weer['train'])
+    query ="INSERT INTO weerinfo(timestamp, ytemp, yhum, yrain, ttemp, thum, train, sproeitijd, sunrise) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    values = (weer['logdate'],weer['ytemp'],weer['yhum'],weer['yrain'],weer['ttemp'],weer['thum'],weer['train'],weer['sproeitijd'],weer['sunrise'])
 
     mycursor.execute(query, values)
     mydb.commit()

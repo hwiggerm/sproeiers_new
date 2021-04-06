@@ -87,6 +87,7 @@ while True:
         
             weathersummary.update(updweather)
 
+            logger.writeline('Store forecast')
             mysqldb.storeweather(weathersummary)
 
             sprinklersetup = True
