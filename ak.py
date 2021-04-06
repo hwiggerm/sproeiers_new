@@ -71,7 +71,7 @@ while True:
             sunrise_iso = weather.sunrise_time(timeformat='date')
             sunset_iso = weather.sunset_time(timeformat='date')
 
-            sprinklersetuptime = sunset_iso
+            sprinklersetuptime = sunrise_iso
             logger.writeline('Set sprinklersetup time tomorrow to: ' + str(sprinklersetuptime) )
            
             logger.writeline('Set Sprinkler timing')
