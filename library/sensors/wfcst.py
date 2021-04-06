@@ -91,6 +91,8 @@ def summarize():
     "yrain": r,
     "ttemp": tt/hourcount,
     "thum": ht/hourcount,
-    "train": rt }
-
+    "train": rt,
+    "sproeitijd": 60,
+    "sunrise": '' }
+    
   return(weather)

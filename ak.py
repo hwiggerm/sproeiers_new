@@ -55,9 +55,9 @@ while True:
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
             
-            logger.writeline('Get weathersummary and forecast to store it in db')
+            logger.writeline('Get weathersummary and forecast')
             weathersummary = wfcst.summarize()
-            mysqldb.storeweather(weathersummary)
+        
 
             timedelta =  0   #in hours -=+
             mindelta  =  10
@@ -80,6 +80,14 @@ while True:
             sprinklerstoptime = (sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta + sproeitijd, seconds=0)).time()
 
             logger.writeline('Sprinkeler start time : ' + str(sprinklerstarttime) + ' - sproeitijd : ' + str(sproeitijd) )
+
+            updweather = {
+              "sproeitijd": sproeitijd,
+              "sunrise": sunrise_iso  }
+        
+            weather.update(updweather)
+
+            mysqldb.storeweather(weathersummary)
 
             sprinklersetup = True
             sprinklerstart = False
