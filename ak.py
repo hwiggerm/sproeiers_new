@@ -54,13 +54,13 @@ while True:
     #plan the sprinkler time
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
-
-            logger.writeline('get weathersummary and forecast to store it in db')
+            
+            logger.writeline('Get weathersummary and forecast to store it in db')
             weathersummary = wfcst.summarize()
             mysqldb.storeweather(weathersummary)
 
             timedelta =  0   #in hours -=+
-            mindelta  =  0
+            mindelta  =  10
             sproeitijd = 60
 
             owm = OWM(owmkey)
@@ -71,12 +71,15 @@ while True:
             sunrise_iso = weather.sunrise_time(timeformat='date')
             sunset_iso = weather.sunset_time(timeformat='date')
 
-            logger.writeline('Setup Sprinkler timing')
-            sprinklerstarttime = ( sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
-            sprinklermidtime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta - (sproeitijd/2), seconds=0)).time()
-            sprinklerstoptime = (sunrise_iso - datetime.timedelta(hours=timedelta, minutes=mindelta - sproeitijd, seconds=0)).time()
+            sprinklersetuptime = sunset_iso
+            logger.writeline('Set sprinklersetup time tomorrow to: ' + str(sprinklersetuptime) )
+           
+            logger.writeline('Set Sprinkler timing')
+            sprinklerstarttime = ( sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
+            sprinklermidtime = (sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta + (sproeitijd/2), seconds=0)).time()
+            sprinklerstoptime = (sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta + sproeitijd, seconds=0)).time()
 
-            logger.writeline('sprinkeler start time : ' + str(sprinklerstarttime) + ' - sproeitijd : ' + str(sproeitijd) )
+            logger.writeline('Sprinkeler start time : ' + str(sprinklerstarttime) + ' - sproeitijd : ' + str(sproeitijd) )
 
             sprinklersetup = True
             sprinklerstart = False
