@@ -107,7 +107,7 @@ while True:
     #start the sprinkler
     if alarm.alarmclock(sprinklerstarttime):
         if not sprinklerstart:
-            logger.writelinet('Start Sprinkler')
+            logger.writeline('Start Sprinkler')
             sprinklerstart = True
 
             if ctrlvalves.openvalve(klepsysteem,'tuinon'):
