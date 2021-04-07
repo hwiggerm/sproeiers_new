@@ -52,6 +52,8 @@ while True:
             valvecheck = ctrlvalves.connect(sproeiklep)
             if valvecheck != '404':
                     logger.writeline('Valves alive at '+ nicetime)
+            else:
+                    logger.writeline('Unable to access Valves at '+ nicetime)
 
     else:
         houraction=False
@@ -65,7 +67,7 @@ while True:
             weathersummary = wfcst.summarize()
         
 
-            timedelta =  0   #in hours -=+
+            timedelta =  3   #in hours -=+
             mindelta  =  10
             sproeitijd = 60
 
