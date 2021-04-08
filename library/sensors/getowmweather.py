@@ -37,8 +37,7 @@ def read_weather():
           "sunset": sunrset_iso,
           "sunrise": sunrise_iso,
           "humidity": humidity }
-
-
+          
     except:
         weatherreport = {
           "outsidetemp": 0,

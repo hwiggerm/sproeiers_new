@@ -40,14 +40,25 @@ while True:
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
             time.sleep(1)
 
-            try:
-                houraction = True
-                logger.writeline('Get Weather at '+ nicetime)
-                tempin = getdht.read_temp()
-                oweer = getowmweather.read_weather()
-                mysqldb.storedata(nicetime, tempin, oweer)
-            except:
-                logger.writeline('Could not receive weatherinfo at '+ nicetime)
+            houraction = True
+            logger.writeline('Get Weather at '+ nicetime)
+            tempin = getdht.read_temp()
+            
+            oweer = getowmweather.read_weather()
+
+            if oweer['sunrise'] == 0:
+                logger.writeline('ow not found ')
+                time.sleep(5)
+
+                oweer = getowmweather.read_weather()                 
+
+                if oweer['sunrise'] == 0:
+                    logger.writeline('ow not found ')
+                    
+                    time.sleep(5)
+                    oweer = getowmweather.read_weather()
+        
+            mysqldb.storedata(nicetime, tempin, oweer)
 
             valvecheck = ctrlvalves.connect(sproeiklep)
             if valvecheck != '404':
