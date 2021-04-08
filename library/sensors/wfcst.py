@@ -27,11 +27,9 @@ def summarize():
 
   hourcount = 0
 
-  tt = 0.0 
-  ht = 0.0
-  avgrain = 0
+  tt = 0
+  ht = 0
   rt = 0
-
   rainvalue = 0
 
   while hourcount < 24:
@@ -63,8 +61,6 @@ def summarize():
   mycursor.execute("SELECT * FROM logweather")
   myresult = mycursor.fetchall()
   
-  #logdate, tempin, tempout, weather, humidity,
-
   v=0
   t=0
   h=0
