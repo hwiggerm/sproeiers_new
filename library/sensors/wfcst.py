@@ -19,7 +19,6 @@ one_call = mgr.one_call(lat=float(geolat), lon=float(geolon), exclude='minutely'
 
 today = date.today()
 yesterday = today + timedelta(days = -1)
-print('today: '+ str(today))
 
 def summarize():
   mysqlun = os.environ.get('MYSQLUN')

@@ -107,7 +107,7 @@ while True:
         
             weathersummary.update(updweather)
 
-            logger.writeline('Store forecast')
+            logger.writeline('Store forecast for today : '+ weathersummary['logdate'])
             mysqldb.storeweather(weathersummary)
 
             sprinklersetup = True
