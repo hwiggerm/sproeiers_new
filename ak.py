@@ -13,6 +13,7 @@ from library.sensors import getowmweather
 from library.sensors import wfcst
 import os
 
+#
 
 klepsysteem = os.environ.get('KLEPSYSTEEM')
 owmkey =  os.environ.get('OWMAPI')
