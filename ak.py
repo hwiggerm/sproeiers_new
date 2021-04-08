@@ -78,10 +78,25 @@ while True:
             logger.writeline('Get weathersummary and forecast')
             weathersummary = wfcst.summarize()
         
-
             timedelta =  3   #in hours -=+
             mindelta  =  10
+
+            # what was the weather yesterday
+            # ytemp yhum yrain ttemp thum train sproeitijd
             sproeitijd = 60
+
+            if weathersummary['ytemp'] < 20:
+                sproeitijd = sproeitijd - 10
+            if weathersummary['ytemp'] < 10:
+                sproeitijd = sproeitijd - 46
+            
+            if weathersummary['ttemp'] > 20:
+                sproeitijd  = sproeitijd + 10
+            if weathersummary['ttemp'] > 25:
+                sproeitijd  = sproeitijd + 30
+
+
+            weathersummary['logdate']
 
             owm = OWM(owmkey)
             mgr = owm.weather_manager()
