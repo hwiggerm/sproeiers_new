@@ -17,16 +17,15 @@ owm = OWM(owmkey)
 mgr = owm.weather_manager()
 one_call = mgr.one_call(lat=float(geolat), lon=float(geolon), exclude='minutely', units='metric')
 
-today = date.today()
-yesterday = today + timedelta(days = -1)
-
 def summarize():
   mysqlun = os.environ.get('MYSQLUN')
   mysqlpw = os.environ.get('MYSQLPW')
   mysqldb = os.environ.get('MYSQLDB')
 
-  hourcount = 0
+  today = date.today()
+  yesterday = today + timedelta(days = -1)
 
+  hourcount = 0
   tt = 0
   ht = 0
   rt = 0
