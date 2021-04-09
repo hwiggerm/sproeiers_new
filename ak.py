@@ -28,6 +28,8 @@ sprinklerstop = False
 sprinklermid = False
 houraction = False
 
+firstrun = True
+
 sprinklersetuptime = dt.now()
 sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
@@ -136,14 +138,18 @@ while True:
 
             #store the wether summary + forecast + spraytime
             logger.writeline('Store forecast for today : '+ weathersummary['logdate'])
-            mysqldb.storeweather(weathersummary)
+            
+            
+            if not firstrun:
+                mysqldb.storeweather(weathersummary)
+
 
             #after the init set the flags the the following routines
             sprinklersetup = True
             sprinklerstart = False
             sprinklerstop = False
             sprinklermid = False
-
+            firstrun = False
     else:
         sprinklersetup = False
 
