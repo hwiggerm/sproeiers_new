@@ -106,7 +106,7 @@ while True:
 
             sprinklersetuptime = sunrise_iso
             
-            if sproeitijd = 0:
+            if sproeitijd == 0:
                 logger.writeline('Today its too cold to sprinkle')
 
             logger.writeline('Set sprinklersetup time to: ' + str(sprinklersetuptime) )
