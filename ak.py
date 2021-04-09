@@ -75,8 +75,8 @@ while True:
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
             
-            logger.writeline('Get weathersummary and forecast')
             weathersummary = wfcst.summarize()
+            logger.writeline('Get weathersummary and forecast for '+str(weathersummary['logdate']))
         
             timedelta =  3   #in hours -=+
             mindelta  =  10
@@ -95,8 +95,6 @@ while True:
             if weathersummary['ttemp'] > 25:
                 sproeitijd  = sproeitijd + 30
 
-
-            weathersummary['logdate']
 
             owm = OWM(owmkey)
             mgr = owm.weather_manager()

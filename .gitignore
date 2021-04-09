@@ -1,6 +1,5 @@
 weatherenv/*
 sproei.sh
 setenvfortest.sh  
-sproei.sh 
 .DS_Store
 __pycache__
