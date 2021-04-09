@@ -88,7 +88,7 @@ while True:
             if weathersummary['ytemp'] < 20:
                 sproeitijd = sproeitijd - 10
             if weathersummary['ytemp'] < 10:
-                sproeitijd = sproeitijd - 46
+                sproeitijd = sproeitijd - 50
             
             if weathersummary['ttemp'] > 20:
                 sproeitijd  = sproeitijd + 10
@@ -105,7 +105,11 @@ while True:
             sunset_iso = weather.sunset_time(timeformat='date')
 
             sprinklersetuptime = sunrise_iso
-            logger.writeline('Set sprinklersetup time tomorrow to: ' + str(sprinklersetuptime) )
+            
+            if sproeitijd = 0:
+                logger.writeline('Today its too cold to sprinkle')
+
+            logger.writeline('Set sprinklersetup time to: ' + str(sprinklersetuptime) )
            
             logger.writeline('Set Sprinkler timing')
             sprinklerstarttime = ( sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
@@ -132,7 +136,7 @@ while True:
         sprinklersetup = False
 
     #start the sprinkler
-    if alarm.alarmclock(sprinklerstarttime):
+    if alarm.alarmclock(sprinklerstarttime) and sproeitijd>0:
         if not sprinklerstart:
             logger.writeline('Start Sprinkler')
             sprinklerstart = True
@@ -148,7 +152,7 @@ while True:
         prinklerstart = False
 
     #midtime the sprinkler
-    if alarm.alarmclock(sprinklermidtime):
+    if alarm.alarmclock(sprinklermidtime) and sproeitijd>0:
         if not sprinklermid:
             print('Switch Sprinkler')
             sprinklermid = True
