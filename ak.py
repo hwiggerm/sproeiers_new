@@ -75,16 +75,24 @@ while True:
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
             
+            # what was the weather yesterday and is predicted for today
             weathersummary = wfcst.summarize()
-            logger.writeline('Get weathersummary and forecast for '+str(weathersummary['logdate']))
+            logger.writeline('Get weathersummary yesterday and forecast for '+str(weathersummary['logdate']))
         
-            timedelta =  3   #in hours -=+
+            #timeshift for testing so that we 'see' the clicks in the morning.
+            #will be 0 wne in production
+            timedelta =  3   #in hours
+            
+            #delta between set time and start the sprinkler
             mindelta  =  10
 
-            # what was the weather yesterday
-            # ytemp yhum yrain ttemp thum train sproeitijd
+            # available data
+            # ytemp yhum yrain ttemp thum train sproeitijd            
+            
+            #start with 60 minutes
             sproeitijd = 60
 
+            #adjust minutes based on weather
             if weathersummary['ytemp'] < 20:
                 sproeitijd = sproeitijd - 10
             if weathersummary['ytemp'] < 10:
@@ -96,6 +104,11 @@ while True:
                 sproeitijd  = sproeitijd + 30
 
 
+            if sproeitijd == 0:
+                logger.writeline('Today its too cold to sprinkle')
+
+
+            #get the sunrise 
             owm = OWM(owmkey)
             mgr = owm.weather_manager()
             observation = mgr.weather_at_place(geolocation)
@@ -104,29 +117,28 @@ while True:
             sunrise_iso = weather.sunrise_time(timeformat='date')
             sunset_iso = weather.sunset_time(timeformat='date')
 
+            #set next day setuptime
             sprinklersetuptime = sunrise_iso
-            
-            if sproeitijd == 0:
-                logger.writeline('Today its too cold to sprinkle')
-
             logger.writeline('Set sprinklersetup time to: ' + str(sprinklersetuptime) )
            
+            #set sprinkeler start, swith and enddate           
             logger.writeline('Set Sprinkler timing')
             sprinklerstarttime = ( sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
             sprinklermidtime = (sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta + (sproeitijd/2), seconds=0)).time()
             sprinklerstoptime = (sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta + sproeitijd, seconds=0)).time()
-
             logger.writeline('Sprinkeler start time : ' + str(sprinklerstarttime) + ' - sproeitijd : ' + str(sproeitijd) )
 
+            #update dict with new sproei/sunrise
             updweather = {
               "sproeitijd": sproeitijd,
               "sunrise": sunrise_iso  }
-        
             weathersummary.update(updweather)
 
+            #store the wether summary + forecast + spraytime
             logger.writeline('Store forecast for today : '+ weathersummary['logdate'])
             mysqldb.storeweather(weathersummary)
 
+            #after the init set the flags the the following routines
             sprinklersetup = True
             sprinklerstart = False
             sprinklerstop = False
@@ -171,7 +183,6 @@ while True:
             print('Stop Sprinkler')
             logger.writeline('Pump Off')
             ctrlpump.pumpoff()
-            #pause
 
             sprinklerstop = True
             if ctrlvalves.openvalve(klepsysteem,'poweroff'):
