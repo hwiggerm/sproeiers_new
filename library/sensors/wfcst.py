@@ -23,7 +23,7 @@ def summarize():
   mysqldb = os.environ.get('MYSQLDB')
 
   today = date.today()
-  yesterday = today + timedelta(days = -1)
+  yesterday = today - timedelta(days = 1)
 
   hourcount = 0
   tt = 0
@@ -49,6 +49,7 @@ def summarize():
     rt = rt + rainvalue
 
   #what was the recorded weather yesterday
+  
   mydb = mysql.connector.connect(
     host="localhost",
     user=mysqlun,
@@ -67,8 +68,8 @@ def summarize():
   hourcountdb = 0
 
   for x in myresult:
-    logdate = str(x[0])
-    date_time_obj = datetime.datetime.strptime(logdate, '%Y-%m-%d %H:%M:%S')
+    ld = str(x[0])
+    date_time_obj = datetime.datetime.strptime(ld, '%Y-%m-%d %H:%M:%S')
     if date_time_obj.date() == yesterday:
         hourcountdb = hourcountdb + 1
 

@@ -78,6 +78,7 @@ while True:
         if not sprinklersetup:
             
             # what was the weather yesterday and is predicted for today
+            weathersummary.clear()
             weathersummary = wfcst.summarize()
             logger.writeline('Get weathersummary yesterday and forecast for '+str(weathersummary['logdate']))
         
