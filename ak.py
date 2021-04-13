@@ -50,13 +50,13 @@ while True:
             oweer = getowmweather.read_weather()
 
             if oweer['sunrise'] == 0:
-                logger.writeline('ow not found ')
+                logger.writeline('ow not found #1 ')
                 time.sleep(5)
 
                 oweer = getowmweather.read_weather()                 
 
                 if oweer['sunrise'] == 0:
-                    logger.writeline('ow not found ')
+                    logger.writeline('ow not found #2')
                     
                     time.sleep(5)
                     oweer = getowmweather.read_weather()

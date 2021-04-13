@@ -8,19 +8,20 @@ from pyowm.owm import OWM
 
 #what is the weatherforecst
 
-owmkey =  os.environ.get('OWMAPI')
-geolocation = os.environ.get('GEOLOC')
-geolat = os.environ.get('GEOLAT')
-geolon = os.environ.get('GEOLON')
-
-owm = OWM(owmkey)
-mgr = owm.weather_manager()
-one_call = mgr.one_call(lat=float(geolat), lon=float(geolon), exclude='minutely', units='metric')
 
 def summarize():
+
+owmkey =  os.environ.get('OWMAPI')
+  geolocation = os.environ.get('GEOLOC')
+  geolat = os.environ.get('GEOLAT')
+  geolon = os.environ.get('GEOLON')
   mysqlun = os.environ.get('MYSQLUN')
   mysqlpw = os.environ.get('MYSQLPW')
   mysqldb = os.environ.get('MYSQLDB')
+
+  owm = OWM(owmkey)
+  mgr = owm.weather_manager()
+  one_call = mgr.one_call(lat=float(geolat), lon=float(geolon), exclude='minutely', units='metric')
 
   today = date.today()
   yesterday = today - timedelta(days = 1)
