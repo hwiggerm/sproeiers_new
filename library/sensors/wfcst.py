@@ -11,7 +11,7 @@ from pyowm.owm import OWM
 
 def summarize():
 
-owmkey =  os.environ.get('OWMAPI')
+  owmkey =  os.environ.get('OWMAPI')
   geolocation = os.environ.get('GEOLOC')
   geolat = os.environ.get('GEOLAT')
   geolon = os.environ.get('GEOLON')
