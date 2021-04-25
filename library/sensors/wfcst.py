@@ -72,7 +72,7 @@ def summarize():
     ld = str(x[0])
     date_time_obj = datetime.datetime.strptime(ld, '%Y-%m-%d %H:%M:%S')
     if date_time_obj.date() == yesterday:
-      if float(x[4] != 0:
+      if float(x[4]) != 0:
         hourcountdb = hourcountdb + 1
 
         t = t + float(x[2])

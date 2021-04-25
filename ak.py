@@ -10,7 +10,9 @@ from library.core import logger
 from library.core import mysqldb
 from library.sensors import getdht
 from library.sensors import getowmweather
+from library.sensors import get_tempsensor
 from library.sensors import wfcst
+
 import os
 
 #
@@ -19,6 +21,7 @@ klepsysteem = os.environ.get('KLEPSYSTEEM')
 owmkey =  os.environ.get('OWMAPI')
 geolocation = os.environ.get('GEOLOC')
 sproeiklep =  'http://10.0.0.141/'
+zwembadsensor =  'http://10.0.0.142/'
 
 ctrlpump.portinit()
 
@@ -46,7 +49,8 @@ while True:
             houraction = True
             logger.writeline('Get Weather at '+ nicetime)
             tempin = getdht.read_temp()
-            
+            tempsensor1 = get_tempsensor.gettemp(zwembadsensor)
+
             oweer = getowmweather.read_weather()
 
             if oweer['sunrise'] == 0:
@@ -61,7 +65,7 @@ while True:
                     time.sleep(5)
                     oweer = getowmweather.read_weather()
         
-            mysqldb.storedata(nicetime, tempin, oweer)
+            mysqldb.storedata(nicetime, tempin, oweer, tempsensor1)
 
             valvecheck = ctrlvalves.connect(sproeiklep)
             if valvecheck != '404':
