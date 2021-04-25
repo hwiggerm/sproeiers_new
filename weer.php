@@ -78,6 +78,8 @@ echo "<td>Temp Outside";
 echo "<td>Weather";
 echo "<td>humidity";
 echo "<td>Rain next hour";
+echo "<td>Temp Sensor1";
+
 echo "<tr>";
 
 while ($temperature_row = mysqli_fetch_array($temperatures))
@@ -88,6 +90,7 @@ while ($temperature_row = mysqli_fetch_array($temperatures))
   echo "<td>".$temperature_row["weather"];
   echo "<td>".$temperature_row["humidity"];
   echo "<td>".$temperature_row["rain 1H"];
+  echo "<td>".$temperature_row["tsensor1"];
   echo "<tr>";
 }
 
