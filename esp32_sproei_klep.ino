@@ -1,15 +1,31 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
-
-
-
+#include "time.h"
 
 /*set the key parameters */
 
 // internet connection 
 const char* ssid = "Dorskamp";
 const char* password = "46498342";
+
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 3600;
+const int   daylightOffset_sec = 3600;
+
+struct tm timeinfo;
+int nsec;
+
+void getTime()
+ {
+  //struct tm timeinfo;
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+    }
+  }
+
 WebServer server(80);
 
 
@@ -42,10 +58,11 @@ void setup() {
   Serial.println(ssid);
 
   WiFi.begin(ssid, password);
-  IPAddress ip(10,0,0,141);   
-  IPAddress gateway(10,0,0,1);   
-  IPAddress subnet(255,255,255,0);   
-  WiFi.config(ip, gateway, subnet);
+  IPAddress ip(192,168,1,141);   
+  IPAddress gateway(192,168,1,254);   
+  IPAddress subnet(255,255,255,0);
+  IPAddress dns(8,8,8,8);  
+  WiFi.config(ip, gateway, subnet,dns);
   int connectcount = 0;
 
   //check wi-fi is connected to wi-fi network if not stop the program
@@ -64,6 +81,10 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi connected..!");
   Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
+
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  getTime();
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 
   // check power and kleppen
   voeding_aan();
@@ -102,6 +123,20 @@ void loop() {
 
   //listen an handle given instruction
 
+
+  if (!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+   
+   nsec = timeinfo.tm_sec;
+  if (nsec == 0 ) {
+      Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+      delay(1000);
+  }
+
+
+  
   server.handleClient();
   // if (pwrstatus) { returncode = 205; }
 
@@ -110,7 +145,7 @@ void loop() {
   { 
       //always switch/leve power on (to be sure) untill swithched off
       digitalWrite(power_pin, HIGH);
-      delay(1000);
+      returncode = 203;
 
     if(zkstatus)
     //zwembad
@@ -118,14 +153,12 @@ void loop() {
     { 
       digitalWrite(zwembad_klep_pin, HIGH);
       returncode = 202;
-      delay(1000);
       digitalWrite(tuin_klep_pin, LOW);
     }
     else
     { 
       digitalWrite(tuin_klep_pin, HIGH);
       returncode = 201;
-      delay(1000);
       digitalWrite(zwembad_klep_pin, LOW);
     }
     //tuin 
@@ -134,14 +167,12 @@ void loop() {
       {
         digitalWrite(tuin_klep_pin, HIGH);
         returncode = 201;
-        delay(1000);
         digitalWrite(zwembad_klep_pin, LOW);
       }
     else
       {
         digitalWrite(zwembad_klep_pin, HIGH);
         returncode = 202;
-        delay(1000);
         digitalWrite(tuin_klep_pin, LOW);
       }
   }
@@ -152,7 +183,6 @@ void loop() {
   { 
     digitalWrite(power_pin, LOW);
     returncode = 203;
-    delay(100);
   }
 }
 
@@ -162,7 +192,7 @@ void loop() {
 
 void handle_status() {
   Serial.println("Status");
-
+  returncode = 203;
   server.send(returncode, "text/plain", "oke" ); 
 }
 
@@ -175,7 +205,7 @@ void handle_zwembadklep_on() {
   pwrstatus = true ;
   zkstatus = true ;
   tkstatus = false ;
-  if (zkstatus) { returncode = 201; }
+
   Serial.println("Zwembadklep Status: ON");
   server.send(returncode, "text/html", SendHTML(true,zkstatus)); 
 }
@@ -184,7 +214,7 @@ void handle_tuinklep_on() {
   pwrstatus = true ;
   tkstatus = true;
   zkstatus = false ;
-  if (tkstatus) { returncode = 201; }
+
   Serial.println("Tuinklep Status: ON");
   // server.send(200, "text/html", SendHTML(true,tkstatus)); 
   server.send(returncode, "text/html", SendHTML(true,'Tuinklep')); 
