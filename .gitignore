@@ -1,0 +1,5 @@
+weatherenv/*
+sproei.sh
+setenvfortest.sh  
+.DS_Store
+__pycache__
