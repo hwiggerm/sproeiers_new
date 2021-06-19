@@ -1,4 +1,3 @@
-
 #include <WiFi.h>
 #include <WebServer.h>
 #include "time.h"
@@ -15,6 +14,10 @@ const int   daylightOffset_sec = 3600;
 
 struct tm timeinfo;
 int nsec;
+int timeOke = 1;
+
+int connectError = 0 ;
+
 
 void getTime()
  {
@@ -27,6 +30,38 @@ void getTime()
   }
 
 WebServer server(80);
+
+void connectNetwork()
+{
+  // connect to dorskamp using a fixed iP
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+  IPAddress ip(192,168,1,141);   
+  IPAddress gateway(192,168,1,254);   
+  IPAddress subnet(255,255,255,0);
+  IPAddress dns(8,8,8,8);  
+  WiFi.config(ip, gateway, subnet,dns);
+  int connectcount = 0;
+
+  //check wi-fi is connected to wi-fi network if not stop the program
+  while (WiFi.status() != WL_CONNECTED) {
+  delay(1000);
+  
+  connectcount = connectcount + 1 ;
+   if (connectcount == 100) {
+      //after 100 tries, wait a minute and try again an attempts to connect
+      delay(60000);
+      connectcount = 0;
+   }
+        Serial.print('.');
+  }
+  Serial.println("WiFi connected..!");
+  Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
+}
+
+
 
 
 // GPIO Pins 21/22/23 
@@ -52,36 +87,11 @@ void setup() {
   pinMode(tuin_klep_pin, OUTPUT);
   pinMode(power_pin, OUTPUT);
   pinMode(ONBOARD_LED, OUTPUT);
-  
-// connect to dorskamp using a fixed iP
-  Serial.println("Connecting to ");
-  Serial.println(ssid);
 
-  WiFi.begin(ssid, password);
-  IPAddress ip(192,168,1,141);   
-  IPAddress gateway(192,168,1,254);   
-  IPAddress subnet(255,255,255,0);
-  IPAddress dns(8,8,8,8);  
-  WiFi.config(ip, gateway, subnet,dns);
-  int connectcount = 0;
 
-  //check wi-fi is connected to wi-fi network if not stop the program
-  while (WiFi.status() != WL_CONNECTED) {
-  delay(1000);
+  //connect to the wifio network
+  connectNetwork();
   
-  connectcount = connectcount + 1 ;
-   if (connectcount == 10) {
-      //stop after 10 attempts to connect
-      stop();
-   }
-  
-  }
-  
-  //connected
-  Serial.println("");
-  Serial.println("WiFi connected..!");
-  Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
-
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   getTime();
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
@@ -120,20 +130,28 @@ void setup() {
 
 // run the program
 void loop() {
+ 
+  //are we still conected?
+  if (WiFi.status() != 3 ) {
+    Serial.println("HELP//SOS//DISCONNECED");
+    Serial.println("initiate reconnection ");
+    connectError = connectError + 1 ;
+    connectNetwork();
+   }
 
   //listen an handle given instruction
 
 
-  if (!getLocalTime(&timeinfo)){
-    Serial.println("Failed to obtain time");
-    return;
-  }
-   
-   nsec = timeinfo.tm_sec;
-  if (nsec == 0 ) {
-      Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-      delay(1000);
-  }
+//  if (!getLocalTime(&timeinfo)){
+//    Serial.println("Failed to obtain time");
+//    return;
+//  }
+//   
+//   nsec = timeinfo.tm_sec;
+//  if (nsec == 0 ) {
+//      Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+//      delay(1000);
+//  }
 
 
   
@@ -145,6 +163,7 @@ void loop() {
   { 
       //always switch/leve power on (to be sure) untill swithched off
       digitalWrite(power_pin, HIGH);
+      delay(1000);
       returncode = 203;
 
     if(zkstatus)
@@ -192,8 +211,14 @@ void loop() {
 
 void handle_status() {
   Serial.println("Status");
+  String statustekst = " "  ;
+  
+  if (pwrstatus) { statustekst = "Power on "; } else { statustekst = "Power off "; }
+  if (zkstatus) { statustekst = statustekst + "Connect errors " + String(connectError) + " - zwembad klep on" ; }
+  if (tkstatus) { statustekst = statustekst + "Connect errors " + String(connectError) + " - tuinklep on" ; }
+ 
   returncode = 203;
-  server.send(returncode, "text/plain", "oke" ); 
+  server.send(returncode, "text/plain", statustekst ); 
 }
 
 void handle_onconnect() {
@@ -254,7 +279,6 @@ void stop(){
 
 void voeding_aan(){
   digitalWrite(power_pin,HIGH);
-  delay(100);
   Serial.println("voeding : ON");
 }
 
@@ -325,12 +349,10 @@ String SendHTML(uint8_t led1stat,uint8_t led2stat){
   {ptr +="<p>Tuin Klep Status: ON</p><a class=\"button button-off\" href=\"/zwembadoff\">OFF</a>\n";}
   else
   {ptr +="<p>LED1 Status: OFF</p><a class=\"button button-on\" href=\"/zwembadon\">ON</a>\n";}
-
   if(zkstatus)
   {ptr +="<p>LED2 Status: ON</p><a class=\"button button-off\" href=\"/tuinoff\">OFF</a>\n";}
   else
   {ptr +="<p>LED2 Status: OFF</p><a class=\"button button-on\" href=\"/tuinon\">ON</a>\n";}
-
   ptr +="</body>\n";
   ptr +="</html>\n";
   */
