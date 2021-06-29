@@ -20,8 +20,8 @@ import os
 klepsysteem = os.environ.get('KLEPSYSTEEM')
 owmkey =  os.environ.get('OWMAPI')
 geolocation = os.environ.get('GEOLOC')
-sproeiklep =  'http://10.0.0.141/'
-zwembadsensor =  'http://10.0.0.142/'
+sproeiklep =  'http://192.168.1.141/'
+zwembadsensor =  'http://192.168.1.142/'
 
 ctrlpump.portinit()
 
@@ -37,6 +37,7 @@ sprinklersetuptime = dt.now()
 sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
 sprinklerstoptime = dt.now()
+
 
 while True:
     if alarm.hoursign():
@@ -96,26 +97,76 @@ while True:
             # available data
             # ytemp yhum yrain ttemp thum train sproeitijd            
             
-            #start with 60 minutes
+#            #start with 60 minutes
+#            sproeitijd = 60
+
+#            #adjust minutes based on weather
+#            if weathersummary['ytemp'] < 20:
+#                sproeitijd = sproeitijd - 10
+#            if weathersummary['ytemp'] < 10:
+#                sproeitijd = sproeitijd - 50
+#            
+#            if weathersummary['ttemp'] > 20:
+#                sproeitijd  = sproeitijd + 10
+#            if weathersummary['ttemp'] > 25:
+#                sproeitijd  = sproeitijd + 30
+#
+#            #yrain / sproeitijd / train
+#
+#
+#
+#            if sproeitijd == 0:
+#                logger.writeline('Today its too cold to sprinkle')
+
+
+
+            ysproei = mysqldb.getyesterdaysprinkler()
+
+            waterunits = 0
+            nieuwesproeitijd = 0
+
+            #start met 60 minuten sproeitijd
             sproeitijd = 60
 
-            #adjust minutes based on weather
-            if weathersummary['ytemp'] < 20:
+
+            #pas de sproeitijd aak op de temperatuur
+            if weathersummary['ttemp'] < 20:
                 sproeitijd = sproeitijd - 10
-            if weathersummary['ytemp'] < 10:
+
+            if weathersummary['ttemp'] < 10:
                 sproeitijd = sproeitijd - 50
-            
+
             if weathersummary['ttemp'] > 20:
                 sproeitijd  = sproeitijd + 10
+
             if weathersummary['ttemp'] > 25:
                 sproeitijd  = sproeitijd + 30
 
+            # neem de regen in de berekening#  
+            # 1mm regen = 20 min sproeien
+            #
+            waterunits = weathersummary['yrain'] * 15
 
-            if sproeitijd == 0:
-                logger.writeline('Today its too cold to sprinkle')
+            # we trekken nu de gevallen regen af van de geplande sproeitijd
+            nieuwesproeitijd = sproeitijd - waterunits
 
+            #als de sproitijd < 10 minuten is dan cancel
+            if nieuwesproeitijd < 10:
+                nieuwesproeitijd = 0;
 
-            #get the sunrise 
+            # we kennen de sproeitijd obv temperatuur en gevallen regen.
+            # als er gisteren gesproeid is en het <25 graden is dan hoeft er vandaag niet gesproeid te worden
+
+            if ysproei != 0:
+            #er is gisteren gesproeid dus vandaag hoeft niet tenzij de temp >25 graden is kies dan de berekende sproeitijd
+                if weathersummary['ttemp'] >= 25:
+                    sproeitijd = nieuwesproeitijd
+                else:
+                    sproeitijd = 0
+            else:
+                sproeitijd = nieuwesproeitijd
+
+            #get the sunrise
             owm = OWM(owmkey)
             mgr = owm.weather_manager()
             observation = mgr.weather_at_place(geolocation)
