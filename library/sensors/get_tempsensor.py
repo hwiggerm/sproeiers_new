@@ -25,9 +25,13 @@ def gettemp(sensor):
         return(False)
 
     else:
-        #print('Connected and feeling fine, status ' + str(alive))
-        myURL = urlopen(sensor+polltemp)
-        btemperature = myURL.read()
-        temperature = btemperature.decode('UTF-8')
-        #print ("Temperature :" + str(temperature))
-        return(temperature)
+        try:
+            #print('Connected and feeling fine, status ' + str(alive))
+            myURL = urlopen(sensor+polltemp)
+            btemperature = myURL.read()
+            temperature = btemperature.decode('UTF-8')
+            #print ("Temperature :" + str(temperature))
+       exception:
+           temperature = 99 
+
+
