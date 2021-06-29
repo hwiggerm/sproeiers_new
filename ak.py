@@ -36,6 +36,10 @@ sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
 sprinklerstoptime = dt.now()
 
+#(re)set sproeiklep
+print('Kleppen')
+ctrlvalves.fixsproeiklep()
+
 
 while True:
     if alarm.hoursign():
@@ -60,10 +64,10 @@ while True:
 
                 if oweer['sunrise'] == 0:
                     logger.writeline('ow not found #2')
-                    
+
                     time.sleep(5)
                     oweer = getowmweather.read_weather()
-        
+
             mysqldb.storedata(nicetime, tempin, oweer, tempsensor1)
 
             valvecheck = ctrlvalves.connect(sproeiklep)
@@ -71,7 +75,10 @@ while True:
                     logger.writeline('Valves alive at '+ nicetime)
             else:
                     logger.writeline('Unable to access Valves at '+ nicetime)
-
+                    valvecheck = ctrlvalves.connect(sproeiklep)
+                    if valvecheck == '404':
+                        logger.writeline('Still an issue withe the valves, lets fix it ')
+                        ctrlvalves.fixsproeiklep()
     else:
         houraction=False
 
@@ -170,6 +177,8 @@ while True:
             if not firstrun:
                 mysqldb.storeweather(weathersummary)
 
+            #pause for 60 seconds to avoid the forecast is triggered for a second time    
+            time.sleep(60)
             weathersummary.clear()
 
             #after the init set the flags the the following routines
@@ -225,4 +234,3 @@ while True:
                 logger.writeline('Error in switching')
     else:
         sprinklerstop = False
-
