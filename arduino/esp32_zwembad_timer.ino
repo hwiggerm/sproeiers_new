@@ -1,16 +1,16 @@
-
 #include "time.h"
 #include <WiFi.h>
 #include <WebServer.h>
+
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
 /*set the key parameters */
 // set date and time for switching
 const int onhour  = 10;
-const int offhour = 11;
+const int offhour = 30;
 const int onmin = 01 ;
-const int offmin = 01 ;
+const int offmin = 31 ;
 const int EVENDATES = 0;
 
 // GPIO where the DS18B20 is connected to
@@ -20,35 +20,65 @@ OneWire oneWire(oneWireBus);
 // Pass our oneWire reference to Dallas Temperature sensor 
 DallasTemperature sensors(&oneWire);
 
-int switchStatus = 0 ;               // status switch
 boolean pompStatus = false ;
+boolean timeAlert = false ;
 
-int switchPin = 4;              // GPIO4 or D2
-int timeAlert ;
-int pompOn = 0;
 
 // Pin settings:
-const int ledPin = 5 ;              // GPIO5 or D1
-const int relaisPin = 14 ;          // GPIO16
+const int ledPin = 18 ;
+const int relaisPin = 14 ;
 
 // internet connection 
 const char* ssid = "Dorskamp";
 const char* password = "46498342";
 
+// timer variables
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 3600;
 const int   daylightOffset_sec = 3600;
-
-WebServer server(80);
+struct tm timeinfo;
 
 int nhour;
 int nminute;
 int nday;
 
-bool zkstatus = false;
+//webserver interaction
 int returncode = 404 ;
-struct tm timeinfo;
 
+
+WebServer server(80);
+
+void connectNetwork()
+{
+  int connectcount = 0;
+  
+  IPAddress ip(192,168,1,142);   
+  IPAddress gateway(192,168,1,254);   
+  IPAddress subnet(255,255,255,0);
+  IPAddress dns(8,8,8,8);  
+  WiFi.config(ip, gateway, subnet,dns);
+
+  // connect to dorskamp using a fixed iP
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  
+  //start wi-fi check connection to wi-fi network if reconnect
+  while (WiFi.begin(ssid, password) != WL_CONNECTED) {
+      delay(10000);
+  
+      connectcount = connectcount + 1 ;
+      if (connectcount == 100 ) {
+      //stop after 100 attempts to connect
+          delay(60000);
+          connectcount = 0 ;
+      }
+       Serial.print('.');
+  }
+  Serial.println("WiFi connected..!");
+  Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
+}
+
+//get the global time and place this in struct timeinfo for use during in the loop
 void getTime()
  {
   //struct tm timeinfo;
@@ -75,40 +105,17 @@ void setup() {
   pinMode(relaisPin, OUTPUT);
   digitalWrite(relaisPin, LOW);
 
+  //connect to the wifio network
+  connectNetwork();
   
-// connect to dorskamp using a fixed iP
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-  IPAddress ip(192,168,1,142);   
-  IPAddress gateway(192,168,1,254);   
-  IPAddress dns(8,8,8,8);  
-  IPAddress subnet(255,255,255,0);   
-  WiFi.config(ip, gateway, subnet, dns);
-  int connectcount = 0;
-
-  //check wi-fi is connected to wi-fi network if not stop the program
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    connectcount = connectcount + 1 ;
-    Serial.print(".");
-    if (connectcount == 50) {
-      //stop after 15 attempts to connect
-      stop();
-   }
-  }
-  
-  //connected
-  Serial.println("");
-  Serial.println("WiFi connected..!");
-  Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
+  //start the webserver 
+  server.begin();
+  Serial.println("HTTP server started");
   
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   getTime();
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 
-  
   //identify instructions and actions
   server.on("/", handle_onconnect);
   server.on("/status", handle_status);
@@ -116,21 +123,22 @@ void setup() {
   server.on("/pompuit", handle_puit);
   server.on("/temp", handle_temp);
   server.onNotFound(handle_NotFound);
-  
-  //start the webserver 
-  server.begin();
-  Serial.println("HTTP server started");
 }
 
 // run the program
 void loop() {
+  
+  //are we still conected?
+  if (WiFi.status() != WL_CONNECTED ) {
+    // not connected -> connect again
+    Serial.println("HELP//SOS//DISCONNECED");
+    Serial.println("initiate reconnection ");
 
-  //listen an handle given instruction
-  server.handleClient();
+    connectNetwork();
+   }
 
-  switchStatus = digitalRead(switchPin);   // read status of switch
-  //digitalWrite(ledPin, switchStatus); 
-  //digitalWrite(relaisPin, switchStatus); 
+   //listen an handle given instruction
+   server.handleClient();
 
   if (!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
@@ -142,23 +150,22 @@ void loop() {
   nhour = timeinfo.tm_hour;
   nminute = timeinfo.tm_min;
   nday = timeinfo.tm_mday;
-  // delay(1000);
   
   /* is this an even day ? if so run opump */
-  if ( ((nday % 2) == EVENDATES) || switchStatus == 1  )
+  if ( ((nday % 2) == EVENDATES)  )
      {
        if(nhour == onhour && nminute == onmin ){
        // set the LED with the ledState of the variable:
-         timeAlert = 1; 
+         timeAlert = true; 
      } // timeron
 
       if(nhour == offhour && nminute == offmin ){
       // set the LED with the ledState of the variable:
-         timeAlert = 0; 
-      } //timeroff
+         timeAlert = false; 
+      } //timeroff  
      } // evendayd
 
-     if( (timeAlert == 1) || switchStatus == 1 || pompStatus){
+     if( timeAlert  || pompStatus){
       digitalWrite(ledPin, HIGH);
       digitalWrite(relaisPin, HIGH);
        } else {
@@ -166,23 +173,24 @@ void loop() {
       digitalWrite(relaisPin, LOW);
      }
  
-  }  
-
-
+}  
 
 //functions responding on webserver instructions
 
 void handle_status() {
   Serial.println("Status");
+  String statustekst = " "  ;
+  
+  if (pompStatus) { statustekst = "Filterpomp on "; } else { statustekst = "Filterpomp off "; }
   returncode = 203;
-  server.send(returncode, "text/plain", "oke" ); 
-}
+  server.send(returncode, "text/plain", statustekst ); 
+  }
 
 void handle_onconnect() {
   returncode = 203;
   Serial.println("Connected");
   server.send(returncode, "text/html", SendHTML(true, 202 )); 
-}
+  }
 
 void handle_temp() {
   Serial.println("Wat is de temperatuur ");
@@ -194,58 +202,25 @@ void handle_temp() {
   returncode = 203;
   server.send(returncode, "text/plain", String(temp) ); 
   
-}
+  }
 
 void handle_NotFound(){
   server.send(404, "text/plain", "Instruction Not found");
-}
+  }
 
 void handle_paan(){
   server.send(203, "text/plain", "Pomp Aan");
   Serial.println("Pomp Aan");
   pompStatus = true ;
   
-}
+  }
 
 void handle_puit(){
   server.send(203, "text/plain", "Pomp Uit");
   Serial.println("Pomp Uit");
   pompStatus = false ;
   
-}
-
-
-
-void stop(){
- while(1){
-      Serial.println("Failed to connect");
-      digitalWrite(ledPin,HIGH);
-      delay(100);
-      digitalWrite(ledPin,LOW);
-      delay(100);
- }
-}
-
-
-void blink_oke(){
-      digitalWrite(ledPin,HIGH);
-      delay(1000);
-      digitalWrite(ledPin,LOW);
-      delay(1000);
-      digitalWrite(ledPin,HIGH);
-      delay(1000);
-      digitalWrite(ledPin,LOW);
-}
-
-void blink_error(){
-      digitalWrite(ledPin,HIGH);
-      delay(1000);
-      digitalWrite(ledPin,LOW);
-      delay(100);
-      digitalWrite(ledPin,HIGH);
-      delay(1000);
-      digitalWrite(ledPin,LOW);
-}
+  }
 
 String SendHTML(uint8_t led1stat,uint8_t led2stat){
   String ptr = "<!DOCTYPE html> <html>\n";
@@ -264,20 +239,6 @@ String SendHTML(uint8_t led1stat,uint8_t led2stat){
   ptr +="<body>\n";
   ptr +="<h1>ESP32 Pool Control + temperature Sensor</h1>\n";
   ptr +="<h3>Listening to your commands</h3>\n";
-  
- /* if(tkstatus)
-  {ptr +="<p>Tuin Klep Status: ON</p><a class=\"button button-off\" href=\"/zwembadoff\">OFF</a>\n";}
-  else
-  {ptr +="<p>LED1 Status: OFF</p><a class=\"button button-on\" href=\"/zwembadon\">ON</a>\n";}
-
-  if(zkstatus)
-  {ptr +="<p>LED2 Status: ON</p><a class=\"button button-off\" href=\"/tuinoff\">OFF</a>\n";}
-  else
-  {ptr +="<p>LED2 Status: OFF</p><a class=\"button button-on\" href=\"/tuinon\">ON</a>\n";}
-
-  ptr +="</body>\n";
-  ptr +="</html>\n";
-  */
-  
+ 
   return ptr;
-}
+  }
