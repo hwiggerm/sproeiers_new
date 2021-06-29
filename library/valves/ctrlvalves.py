@@ -26,3 +26,15 @@ def openvalve(sproeiklep,klepstatus):
 		commando = sproeiklep + klepstatus
 		valve = connect(commando)
 		return(valve)
+
+
+def fixsproeiklep():
+        try:
+                print('uit')
+                fb = urllib.request.urlopen('http://192.168.1.85:85/klik.php?status=0')
+                time.sleep(5)
+                print('aan')
+                fb = urllib.request.urlopen('http://192.168.1.85:85/klik.php?status=1')
+                return('Done')
+        except:
+                return('.')
