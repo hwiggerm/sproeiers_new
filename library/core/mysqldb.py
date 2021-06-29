@@ -16,8 +16,13 @@ def storedata(timestamp,tempin, oweer, tempsensor1):
 
     mycursor = mydb.cursor()
 
+    print(oweer)
+    print(tempin)
+    print(tempsensor1)
+
+
     query ="INSERT INTO logweather(logdate, tempin, tempout, weather, humidity, rain1h, rain3h, tsensor1) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-    values = (timestamp,str(tempin),oweer['outsidetemp'],oweer['weather'], oweer['humidity'], oweer['rain1h'], oweer['rain3h'], str(tempsensor1))
+    values = (timestamp,float(tempin),float(oweer['outsidetemp']),oweer['weather'], float(oweer['humidity']), float(oweer['rain1h']), float(oweer['rain3h']), float(tempsensor1))
 
     mycursor.execute(query, values)
     mydb.commit()
@@ -38,4 +43,20 @@ def storeweather(weer):
 
     mycursor.execute(query, values)
     mydb.commit()
+
+
+def getyesterdaysprinkler():
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user=mysqlun,
+    password=mysqlpw,
+    database=mysqldb,
+    )
+
+    mycursor = mydb.cursor()
+ 
+    query = "select sproeitijd from weerinfo order by timestamp desc LIMIT 1,1"
+
+    mycursor.execute(query)
+    return(mycursor.fetchone() )
 
