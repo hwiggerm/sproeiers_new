@@ -2,8 +2,6 @@
 #include <WebServer.h>
 #include "time.h"
 
-/*set the key parameters */
-
 // internet connection 
 const char* ssid = "Dorskamp";
 const char* password = "46498342";
@@ -17,7 +15,7 @@ int nsec;
 int timeOke = 1;
 
 int connectError = 0 ;
-
+WebServer server(80);
 
 void getTime()
  {
@@ -29,40 +27,36 @@ void getTime()
     }
   }
 
-WebServer server(80);
 
 void connectNetwork()
 {
-  // connect to dorskamp using a fixed iP
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-  IPAddress ip(192,168,1,141);   
+  int connectcount = 0;
+  
+  IPAddress ip(192,168,1,142);   
   IPAddress gateway(192,168,1,254);   
   IPAddress subnet(255,255,255,0);
   IPAddress dns(8,8,8,8);  
   WiFi.config(ip, gateway, subnet,dns);
-  int connectcount = 0;
 
-  //check wi-fi is connected to wi-fi network if not stop the program
-  while (WiFi.status() != WL_CONNECTED) {
-  delay(1000);
+  // connect to dorskamp using a fixed iP
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
   
-  connectcount = connectcount + 1 ;
-   if (connectcount == 100) {
-      //after 100 tries, wait a minute and try again an attempts to connect
-      delay(60000);
-      connectcount = 0;
-   }
-        Serial.print('.');
+  //start wi-fi check connection to wi-fi network if reconnect
+  while (WiFi.begin(ssid, password) != WL_CONNECTED) {
+      delay(10000);
+  
+      connectcount = connectcount + 1 ;
+      if (connectcount == 100 ) {
+      //stop after 100 attempts to connect
+          delay(60000);
+          connectcount = 0 ;
+      }
+       Serial.print('.');
   }
   Serial.println("WiFi connected..!");
   Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
 }
-
-
-
 
 // GPIO Pins 21/22/23 
 #define ONBOARD_LED  2
@@ -112,9 +106,7 @@ void setup() {
 
   voeding_uit();
 
-  //confirm checks are done
-  blink_oke();
-  
+
  //identify instructions and actions
   server.on("/", handle_onconnect);
   server.on("/status", handle_status);
@@ -135,28 +127,12 @@ void loop() {
   if (WiFi.status() != 3 ) {
     Serial.println("HELP//SOS//DISCONNECED");
     Serial.println("initiate reconnection ");
-    connectError = connectError + 1 ;
+
     connectNetwork();
    }
 
   //listen an handle given instruction
-
-
-//  if (!getLocalTime(&timeinfo)){
-//    Serial.println("Failed to obtain time");
-//    return;
-//  }
-//   
-//   nsec = timeinfo.tm_sec;
-//  if (nsec == 0 ) {
-//      Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-//      delay(1000);
-//  }
-
-
-  
   server.handleClient();
-  // if (pwrstatus) { returncode = 205; }
 
   //only set kleppen when power is on
   if(pwrstatus)
@@ -307,26 +283,6 @@ void zwembadklep_uit(){
   Serial.println("zwembadklep : OFF");
 }
 
-void blink_oke(){
-      digitalWrite(ONBOARD_LED,HIGH);
-      delay(1000);
-      digitalWrite(ONBOARD_LED,LOW);
-      delay(1000);
-      digitalWrite(ONBOARD_LED,HIGH);
-      delay(1000);
-      digitalWrite(ONBOARD_LED,LOW);
-}
-
-void blink_error(){
-      digitalWrite(ONBOARD_LED,HIGH);
-      delay(1000);
-      digitalWrite(ONBOARD_LED,LOW);
-      delay(100);
-      digitalWrite(ONBOARD_LED,HIGH);
-      delay(1000);
-      digitalWrite(ONBOARD_LED,LOW);
-}
-
 String SendHTML(uint8_t led1stat,uint8_t led2stat){
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
@@ -344,18 +300,6 @@ String SendHTML(uint8_t led1stat,uint8_t led2stat){
   ptr +="<body>\n";
   ptr +="<h1>ESP32 Sprinkler Control</h1>\n";
   ptr +="<h3>Listening to your commands</h3>\n";
-  
- /* if(tkstatus)
-  {ptr +="<p>Tuin Klep Status: ON</p><a class=\"button button-off\" href=\"/zwembadoff\">OFF</a>\n";}
-  else
-  {ptr +="<p>LED1 Status: OFF</p><a class=\"button button-on\" href=\"/zwembadon\">ON</a>\n";}
-  if(zkstatus)
-  {ptr +="<p>LED2 Status: ON</p><a class=\"button button-off\" href=\"/tuinoff\">OFF</a>\n";}
-  else
-  {ptr +="<p>LED2 Status: OFF</p><a class=\"button button-on\" href=\"/tuinon\">ON</a>\n";}
-  ptr +="</body>\n";
-  ptr +="</html>\n";
-  */
   
   return ptr;
 }
