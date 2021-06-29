@@ -15,8 +15,6 @@ from library.sensors import wfcst
 
 import os
 
-#
-
 klepsysteem = os.environ.get('KLEPSYSTEEM')
 owmkey =  os.environ.get('OWMAPI')
 geolocation = os.environ.get('GEOLOC')
@@ -51,7 +49,7 @@ while True:
             logger.writeline('Get Weather at '+ nicetime)
             tempin = getdht.read_temp()
             tempsensor1 = get_tempsensor.gettemp(zwembadsensor)
-
+          
             oweer = getowmweather.read_weather()
 
             if oweer['sunrise'] == 0:
@@ -94,32 +92,6 @@ while True:
             #delta between set time and start the sprinkler
             mindelta  =  10
 
-            # available data
-            # ytemp yhum yrain ttemp thum train sproeitijd            
-            
-#            #start with 60 minutes
-#            sproeitijd = 60
-
-#            #adjust minutes based on weather
-#            if weathersummary['ytemp'] < 20:
-#                sproeitijd = sproeitijd - 10
-#            if weathersummary['ytemp'] < 10:
-#                sproeitijd = sproeitijd - 50
-#            
-#            if weathersummary['ttemp'] > 20:
-#                sproeitijd  = sproeitijd + 10
-#            if weathersummary['ttemp'] > 25:
-#                sproeitijd  = sproeitijd + 30
-#
-#            #yrain / sproeitijd / train
-#
-#
-#
-#            if sproeitijd == 0:
-#                logger.writeline('Today its too cold to sprinkle')
-
-
-
             ysproei = mysqldb.getyesterdaysprinkler()
 
             waterunits = 0
@@ -127,7 +99,6 @@ while True:
 
             #start met 60 minuten sproeitijd
             sproeitijd = 60
-
 
             #pas de sproeitijd aak op de temperatuur
             if weathersummary['ttemp'] < 20:
@@ -184,6 +155,7 @@ while True:
             sprinklerstarttime = ( sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
             sprinklermidtime = (sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta + (sproeitijd/2), seconds=0)).time()
             sprinklerstoptime = (sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta + sproeitijd, seconds=0)).time()
+
             logger.writeline('Sprinkeler start time : ' + str(sprinklerstarttime) + ' - sproeitijd : ' + str(sproeitijd) )
 
             #update dict with new sproei/sunrise
@@ -194,8 +166,7 @@ while True:
 
             #store the wether summary + forecast + spraytime
             logger.writeline('Store forecast for today : '+ weathersummary['logdate'])
-            
-            
+                
             if not firstrun:
                 mysqldb.storeweather(weathersummary)
 
