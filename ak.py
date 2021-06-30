@@ -79,6 +79,20 @@ while True:
                     if valvecheck == '404':
                         logger.writeline('Still an issue withe the valves, lets fix it ')
                         ctrlvalves.fixsproeiklep()
+                        
+                        #was it fixed? 
+                        valvecheck = ctrlvalves.connect(sproeiklep)
+                        if valvecheck != '404':
+                            logger.writeline('Valves fixed at '+ nicetime)
+                        else:
+                            #lets wait a minute and retry the fix
+                            time.sleep(60)
+                            logger.writeline('Lets retry the fix ')
+                            
+                            ctrlvalves.fixsproeiklep()
+                            logger.writeline('Retried...  ')
+                            valvecheck = ctrlvalves.connect(sproeiklep)
+                            logger.writeline('Klepcode : ' + valvecheck)
     else:
         houraction=False
 
