@@ -1,9 +1,10 @@
-from  library.timer import alarm
+#!/usr/bin/env python
 import datetime
 import time
 from datetime import datetime as dt
 from pyowm.owm import OWM
 
+from library.timer import alarm
 from library.valves import ctrlvalves
 from library.valves import ctrlpump
 from library.core import logger
@@ -15,8 +16,13 @@ from library.sensors import wfcst
 
 import os
 
+import telepot
+from telepot.loop import MessageLoop
+
 klepsysteem = os.environ.get('KLEPSYSTEEM')
 owmkey =  os.environ.get('OWMAPI')
+telegramkey = os.environ.get('TELEGRAMKEY')
+
 geolocation = os.environ.get('GEOLOC')
 sproeiklep =  'http://192.168.1.141/'
 zwembadsensor =  'http://192.168.1.142/'
@@ -40,8 +46,22 @@ sprinklerstoptime = dt.now()
 print('Kleppen')
 ctrlvalves.fixsproeiklep()
 
+def handle(msg):
+    chat_id = msg['chat']['id']
+    command = msg['text']
+
+    if command == '/time':
+        bot.sendMessage(chat_id, str(datetime.datetime.now()))
+    elif command == '/temp':
+        bot.sendMessage(chat_id, str(tempin))
+
+bot = telepot.Bot(telegramkey)
+MessageLoop(bot, handle).run_as_thread()
+logger.writeline('I Am listening...')
+
 
 while True:
+
     if alarm.hoursign():
         if not houraction:
 
@@ -53,14 +73,14 @@ while True:
             logger.writeline('Get Weather at '+ nicetime)
             tempin = getdht.read_temp()
             tempsensor1 = get_tempsensor.gettemp(zwembadsensor)
-          
+
             oweer = getowmweather.read_weather()
 
             if oweer['sunrise'] == 0:
                 logger.writeline('ow not found #1 ')
                 time.sleep(5)
 
-                oweer = getowmweather.read_weather()                 
+                oweer = getowmweather.read_weather()
 
                 if oweer['sunrise'] == 0:
                     logger.writeline('ow not found #2')
@@ -70,29 +90,42 @@ while True:
 
             mysqldb.storedata(nicetime, tempin, oweer, tempsensor1)
 
-            valvecheck = ctrlvalves.connect(sproeiklep)
+            valvecheckcode = ctrlvalves.valvecheck()
+            logger.writeline('Valves status at '+ nicetime + ' ' + valvecheckcode)
+
+
+            """ valvecheck = ctrlvalves.connect(sproeiklep)
             if valvecheck != '404':
                     logger.writeline('Valves alive at '+ nicetime)
             else:
                     logger.writeline('Unable to access Valves at '+ nicetime)
+
+                    #wait 10 seconds and then retry
+                    time.sleep(10)
                     valvecheck = ctrlvalves.connect(sproeiklep)
+
                     if valvecheck == '404':
                         logger.writeline('Still an issue withe the valves, lets fix it ')
                         ctrlvalves.fixsproeiklep()
-                        
-                        #was it fixed? 
+
+                        #wait till its started
+                        time.sleep(60)
+
+                        #was it fixed?
                         valvecheck = ctrlvalves.connect(sproeiklep)
                         if valvecheck != '404':
                             logger.writeline('Valves fixed at '+ nicetime)
+
                         else:
                             #lets wait a minute and retry the fix
-                            time.sleep(60)
-                            logger.writeline('Lets retry the fix ')
-                            
+                            logger.writeline('Lets retry the fix again ')
                             ctrlvalves.fixsproeiklep()
+                            time.sleep(60)
+
                             logger.writeline('Retried...  ')
                             valvecheck = ctrlvalves.connect(sproeiklep)
                             logger.writeline('Klepcode : ' + valvecheck)
+                """
     else:
         houraction=False
 
@@ -159,13 +192,7 @@ while True:
                 sproeitijd = nieuwesproeitijd
 
             #get the sunrise
-            owm = OWM(owmkey)
-            mgr = owm.weather_manager()
-            observation = mgr.weather_at_place(geolocation)
-
-            weather = observation.weather
-            sunrise_iso = weather.sunrise_time(timeformat='date')
-            sunset_iso = weather.sunset_time(timeformat='date')
+            sunrise_iso = getowmweather.getsunrise()
 
             #set next day setuptime
             sprinklersetuptime = sunrise_iso
