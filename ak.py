@@ -70,6 +70,7 @@ while True:
             time.sleep(1)
 
             houraction = True
+
             logger.writeline('Get Weather at '+ nicetime)
             tempin = getdht.read_temp()
             tempsensor1 = get_tempsensor.gettemp(zwembadsensor)
@@ -90,59 +91,26 @@ while True:
 
             mysqldb.storedata(nicetime, tempin, oweer, tempsensor1)
 
-            valvecheckcode = ctrlvalves.valvecheck()
+            valvecheckcode = ctrlvalves.valvecheck(sproeiklep)
             logger.writeline('Valves status at '+ nicetime + ' ' + valvecheckcode)
 
-
-            """ valvecheck = ctrlvalves.connect(sproeiklep)
-            if valvecheck != '404':
-                    logger.writeline('Valves alive at '+ nicetime)
-            else:
-                    logger.writeline('Unable to access Valves at '+ nicetime)
-
-                    #wait 10 seconds and then retry
-                    time.sleep(10)
-                    valvecheck = ctrlvalves.connect(sproeiklep)
-
-                    if valvecheck == '404':
-                        logger.writeline('Still an issue withe the valves, lets fix it ')
-                        ctrlvalves.fixsproeiklep()
-
-                        #wait till its started
-                        time.sleep(60)
-
-                        #was it fixed?
-                        valvecheck = ctrlvalves.connect(sproeiklep)
-                        if valvecheck != '404':
-                            logger.writeline('Valves fixed at '+ nicetime)
-
-                        else:
-                            #lets wait a minute and retry the fix
-                            logger.writeline('Lets retry the fix again ')
-                            ctrlvalves.fixsproeiklep()
-                            time.sleep(60)
-
-                            logger.writeline('Retried...  ')
-                            valvecheck = ctrlvalves.connect(sproeiklep)
-                            logger.writeline('Klepcode : ' + valvecheck)
-                """
-    else:
-        houraction=False
+        else:
+            houraction = False
 
 
     #plan the sprinkler time
     if alarm.alarmclock(sprinklersetuptime):
         if not sprinklersetup:
-            
+
             # what was the weather yesterday and is predicted for today
-            
+
             weathersummary = wfcst.summarize()
             logger.writeline('Get weathersummary yesterday and forecast for '+str(weathersummary['logdate']))
-        
+
             #timeshift for testing so that we 'see' the clicks in the morning.
             #will be 0 wne in production
             timedelta =  3   #in hours
-            
+
             #delta between set time and start the sprinkler
             mindelta  =  10
 
@@ -167,7 +135,7 @@ while True:
             if weathersummary['ttemp'] > 25:
                 sproeitijd  = sproeitijd + 30
 
-            # neem de regen in de berekening#  
+            # neem de regen in de berekening#
             # 1mm regen = 20 min sproeien
             #
             waterunits = weathersummary['yrain'] * 15
@@ -197,8 +165,8 @@ while True:
             #set next day setuptime
             sprinklersetuptime = sunrise_iso
             logger.writeline('Set sprinklersetup time to: ' + str(sprinklersetuptime) )
-           
-            #set sprinkeler start, swith and enddate           
+
+            #set sprinkeler start, swith and enddate
             logger.writeline('Set Sprinkler timing')
             sprinklerstarttime = ( sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta, seconds=0)).time()
             sprinklermidtime = (sunrise_iso + datetime.timedelta(hours=timedelta, minutes=mindelta + (sproeitijd/2), seconds=0)).time()
@@ -214,11 +182,11 @@ while True:
 
             #store the wether summary + forecast + spraytime
             logger.writeline('Store forecast for today : '+ weathersummary['logdate'])
-                
+
             if not firstrun:
                 mysqldb.storeweather(weathersummary)
 
-            #pause for 60 seconds to avoid the forecast is triggered for a second time    
+            #pause for 60 seconds to avoid the forecast is triggered for a second time
             time.sleep(60)
             weathersummary.clear()
 
