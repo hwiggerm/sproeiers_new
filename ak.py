@@ -29,6 +29,11 @@ zwembadsensor =  'http://192.168.1.142/'
 
 ctrlpump.portinit()
 
+#(re)set sproeiklep
+print('Kleppen')
+ctrlvalves.fixsproeiklep()
+
+
 sprinklersetup = False
 sprinklerstart = False
 sprinklerstop = False
@@ -42,9 +47,6 @@ sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
 sprinklerstoptime = dt.now()
 
-#(re)set sproeiklep
-print('Kleppen')
-ctrlvalves.fixsproeiklep()
 
 def handle(msg):
     chat_id = msg['chat']['id']
