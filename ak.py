@@ -55,47 +55,42 @@ def handle(msg):
     elif command == '/temp':
         bot.sendMessage(chat_id, str(tempin))
 
-bot = telepot.Bot(telegramkey)
-MessageLoop(bot, handle).run_as_thread()
-logger.writeline('I Am listening...')
+#bot = telepot.Bot(telegramkey)
+#MessageLoop(bot, handle).run_as_thread()
+#logger.writeline('I Am listening...')
 
 
 while True:
 
     if alarm.hoursign():
         if not houraction:
-
+            print('hourcheck')
             now = datetime.datetime.now()
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
             time.sleep(1)
 
             houraction = True
 
+            tempin = 0
+            tempsensor1 = 0
+
             logger.writeline('Get Weather at '+ nicetime)
             tempin = getdht.read_temp()
             tempsensor1 = get_tempsensor.gettemp(zwembadsensor)
 
             oweer = getowmweather.read_weather()
-
-            if oweer['sunrise'] == 0:
-                logger.writeline('ow not found #1 ')
-                time.sleep(5)
-
-                oweer = getowmweather.read_weather()
-
-                if oweer['sunrise'] == 0:
-                    logger.writeline('ow not found #2')
-
-                    time.sleep(5)
-                    oweer = getowmweather.read_weather()
+ 
+            print(oweer)
 
             mysqldb.storedata(nicetime, tempin, oweer, tempsensor1)
 
             valvecheckcode = ctrlvalves.valvecheck(sproeiklep)
+            print(valvecheckcode)
             logger.writeline('Valves status at '+ nicetime + ' ' + valvecheckcode)
 
-        else:
-            houraction = False
+    else:
+        houraction = False
+
 
 
     #plan the sprinkler time
@@ -109,10 +104,10 @@ while True:
 
             #timeshift for testing so that we 'see' the clicks in the morning.
             #will be 0 wne in production
-            timedelta =  3   #in hours
+            timedelta =  5   #in hours
 
             #delta between set time and start the sprinkler
-            mindelta  =  10
+            mindelta  =  0
 
             ysproei = mysqldb.getyesterdaysprinkler()
 
