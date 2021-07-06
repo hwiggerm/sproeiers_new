@@ -7,8 +7,8 @@
 
 /*set the key parameters */
 // set date and time for switching
-const int onhour  = 10;
-const int offhour = 30;
+const int onhour  = 11;
+const int offhour = 12;
 const int onmin = 01 ;
 const int offmin = 31 ;
 const int EVENDATES = 0;
