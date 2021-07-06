@@ -7,10 +7,10 @@
 
 /*set the key parameters */
 // set date and time for switching
-const int onhour  = 11;
-const int offhour = 12;
+const int onhour  = 12;
+const int offhour = 13;
 const int onmin = 01 ;
-const int offmin = 31 ;
+const int offmin = 01 ;
 const int EVENDATES = 0;
 
 // GPIO where the DS18B20 is connected to
@@ -165,12 +165,12 @@ void loop() {
       } //timeroff  
      } // evendayd
 
-     if( timeAlert  || pompStatus){
-      digitalWrite(ledPin, HIGH);
-      digitalWrite(relaisPin, HIGH);
-       } else {
-      digitalWrite(ledPin, LOW);
-      digitalWrite(relaisPin, LOW);
+   if( timeAlert  || pompStatus){
+    digitalWrite(ledPin, HIGH);
+    digitalWrite(relaisPin, HIGH);
+     } else {
+    digitalWrite(ledPin, LOW);
+    digitalWrite(relaisPin, LOW);
      }
  
 }  
