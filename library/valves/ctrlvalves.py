@@ -38,3 +38,45 @@ def fixsproeiklep():
                 return('Done')
         except:
                 return('.')
+
+
+def valvecheck(sproeiklep):
+        valvecheckcode = connect(sproeiklep)
+        checkresult = ''
+
+        if valvecheckcode != '404':
+            checkresult = 'Valves alive'
+
+        else:
+
+            #wait 30 seconds and then retry
+            time.sleep(30)
+            valvecheckcode = connect(sproeiklep)
+
+            if valvecheckcode == '404':
+                #fix klep
+                fixsproeiklep()
+
+                #wait till its restarted
+                time.sleep(30)
+
+                #was it fixed?
+                valvecheckcode = connect(sproeiklep)
+                if valvecheckcode != '404':
+                    checkresult = 'Valves recovered 1x and alive'
+
+                else:
+                    #not solved lets wait a minute and retry the fix
+                    fixsproeiklep()
+                    time.sleep(30)
+
+                    #does it work?
+                    valvecheckcode = connect(sproeiklep)
+                    if valvecheckcode != '404':
+                        checkresult = 'Valves recovered 2x and alive'
+                    else:
+                        checkresult = 'Valves in error even after fixing'
+            else:
+                checkresult = 'Valves alive'
+
+        return(checkresult)
