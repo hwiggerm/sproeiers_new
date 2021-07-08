@@ -16,12 +16,8 @@ from library.sensors import wfcst
 
 import os
 
-import telepot
-from telepot.loop import MessageLoop
-
 klepsysteem = os.environ.get('KLEPSYSTEEM')
 owmkey =  os.environ.get('OWMAPI')
-telegramkey = os.environ.get('TELEGRAMKEY')
 
 geolocation = os.environ.get('GEOLOC')
 sproeiklep =  'http://192.168.1.141/'
@@ -32,7 +28,7 @@ ctrlpump.portinit()
 #(re)set sproeiklep
 print('Kleppen')
 ctrlvalves.fixsproeiklep()
-
+time.sleep(30)
 
 sprinklersetup = False
 sprinklerstart = False
@@ -47,21 +43,6 @@ sprinklerstarttime = dt.now()
 sprinklermidtime = dt.now()
 sprinklerstoptime = dt.now()
 
-
-def handle(msg):
-    chat_id = msg['chat']['id']
-    command = msg['text']
-
-    if command == '/time':
-        bot.sendMessage(chat_id, str(datetime.datetime.now()))
-    elif command == '/temp':
-        bot.sendMessage(chat_id, str(tempin))
-
-#bot = telepot.Bot(telegramkey)
-#MessageLoop(bot, handle).run_as_thread()
-#logger.writeline('I Am listening...')
-
-
 while True:
 
     if alarm.hoursign():
@@ -69,7 +50,6 @@ while True:
             print('hourcheck')
             now = datetime.datetime.now()
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
-            time.sleep(1)
 
             houraction = True
 
@@ -77,17 +57,18 @@ while True:
             tempsensor1 = 0
 
             logger.writeline('Get Weather at '+ nicetime)
+
             tempin = getdht.read_temp()
-            tempsensor1 = get_tempsensor.gettemp(zwembadsensor)
+            # tempsensor1 = get_tempsensor.gettemp(zwembadsensor)
 
             oweer = getowmweather.read_weather()
- 
+
             print(oweer)
 
             mysqldb.storedata(nicetime, tempin, oweer, tempsensor1)
 
+
             valvecheckcode = ctrlvalves.valvecheck(sproeiklep)
-            print(valvecheckcode)
             logger.writeline('Valves status at '+ nicetime + ' ' + valvecheckcode)
 
     else:
@@ -106,18 +87,23 @@ while True:
 
             #timeshift for testing so that we 'see' the clicks in the morning.
             #will be 0 wne in production
-            timedelta =  5   #in hours
+            timedelta =  4   #in hours
 
             #delta between set time and start the sprinkler
             mindelta  =  0
 
-            ysproei = mysqldb.getyesterdaysprinkler()
+            ysproeilist = mysqldb.getyesterdaysprinkler()
+            ysproei = ysproeilist[0]
+
+            logger.writeline('Sproeitijd Gisteren : ' + str(ysproei)  )
 
             waterunits = 0
             nieuwesproeitijd = 0
 
             #start met 60 minuten sproeitijd
             sproeitijd = 60
+
+            logger.writeline('Verwachte temperatuur vandaag : '+ str(weathersummary['ttemp']) )
 
             #pas de sproeitijd aak op de temperatuur
             if weathersummary['ttemp'] < 20:
@@ -132,29 +118,50 @@ while True:
             if weathersummary['ttemp'] > 25:
                 sproeitijd  = sproeitijd + 30
 
+            logger.writeline('Sproeitijd gebaseerd op de temperatuur : '+ str(sproeitijd))
+
             # neem de regen in de berekening#
             # 1mm regen = 20 min sproeien
             #
+
+            logger.writeline('Yesterdays Rain : '+ str(weathersummary['yrain']))
             waterunits = weathersummary['yrain'] * 15
+
+
+            logger.writeline('Waterunits : '+ str(waterunits))
+
 
             # we trekken nu de gevallen regen af van de geplande sproeitijd
             nieuwesproeitijd = sproeitijd - waterunits
 
+            logger.writeline('Nieuwe sproeitijd : '+ str(nieuwesproeitijd))
+
+
             #als de sproitijd < 10 minuten is dan cancel
             if nieuwesproeitijd < 10:
-                nieuwesproeitijd = 0;
+                nieuwesproeitijd = 0
+
+            logger.writeline('Nieuwe sproeitijd na 10min check : '+ str(nieuwesproeitijd))
+
 
             # we kennen de sproeitijd obv temperatuur en gevallen regen.
             # als er gisteren gesproeid is en het <25 graden is dan hoeft er vandaag niet gesproeid te worden
 
             if ysproei != 0:
             #er is gisteren gesproeid dus vandaag hoeft niet tenzij de temp >25 graden is kies dan de berekende sproeitijd
+                logger.writeline('looks like ysproei was <> 0')
                 if weathersummary['ttemp'] >= 25:
                     sproeitijd = nieuwesproeitijd
                 else:
                     sproeitijd = 0
             else:
+                #ysproei was 0
                 sproeitijd = nieuwesproeitijd
+
+            logger.writeline('Finale sproeitijd : '+ str(sproeitijd))
+
+            #debug only
+            #sproeitijd = 30
 
             #get the sunrise
             sunrise_iso = getowmweather.getsunrise()
@@ -196,47 +203,30 @@ while True:
     else:
         sprinklersetup = False
 
-    #start the sprinkler
+    #start the sprinkler = start met de tuin
     if alarm.alarmclock(sprinklerstarttime) and sproeitijd>0:
         if not sprinklerstart:
             logger.writeline('Start Sprinkler')
             sprinklerstart = True
-
-            if ctrlvalves.openvalve(klepsysteem,'tuinon'):
-                logger.writeline('Valve Switched tuin')
-                ctrlpump.pumpon()
-                logger.writeline('Pump On')
-            else:
-                logger.writeline('Error in switching tuin')
-
+            klepstatus = ctrlpump.startsproeier()
+            logger.writeline(klepstatus)
     else:
         prinklerstart = False
 
-    #midtime the sprinkler
+    #midtime the sprinkler = doe het zwembad
     if alarm.alarmclock(sprinklermidtime) and sproeitijd>0:
         if not sprinklermid:
-            print('Switch Sprinkler')
             sprinklermid = True
-
-            if ctrlvalves.openvalve(klepsysteem,'zwembadon'):
-                logger.writeline('Valve Switched zwembad')
-            else:
-                logger.writeline('Error in switching zwembad')
-
+            klepstatus = ctrlpump.sproeizwembad()
+            logger.writeline(klepstatus)
     else:
         sprinklermid = False
 
     #we are ready
     if alarm.alarmclock(sprinklerstoptime):
         if not sprinklerstop:
-            print('Stop Sprinkler')
-            logger.writeline('Pump Off')
-            ctrlpump.pumpoff()
-
             sprinklerstop = True
-            if ctrlvalves.openvalve(klepsysteem,'poweroff'):
-                logger.writeline('poweroff')
-            else:
-                logger.writeline('Error in switching')
+            klepstatus = ctrlpump.stopsproeier()
+            logger.writeline(klepstatus)
     else:
         sprinklerstop = False
