@@ -20,12 +20,12 @@ def openvalve(sproeiklep,klepstatus):
 
 	if alive == '404':
 		#print('Connect Error')
-		return(False)
+		return(False,'Connect Error')
 	else:
 		#print('Connected and feeling fine, status ' + str(alive))
 		commando = sproeiklep + klepstatus
 		valve = connect(commando)
-		return(valve)
+		return(True,'Opened '+valve)
 
 
 def fixsproeiklep():
@@ -35,17 +35,16 @@ def fixsproeiklep():
                 time.sleep(5)
                 print('aan')
                 fb = urllib.request.urlopen('http://192.168.1.85:85/klik.php?status=1')
-                return('Done')
+                return(True,'Done')
         except:
-                return('.')
+                return(False,'Error `Connecting kika')
 
 
 def valvecheck(sproeiklep):
         valvecheckcode = connect(sproeiklep)
-        checkresult = ''
 
         if valvecheckcode != '404':
-            checkresult = 'Valves alive'
+            return(True,'Valves alive')
 
         else:
 
@@ -63,7 +62,7 @@ def valvecheck(sproeiklep):
                 #was it fixed?
                 valvecheckcode = connect(sproeiklep)
                 if valvecheckcode != '404':
-                    checkresult = 'Valves recovered 1x and alive'
+                    return(True,'Valves recovered 1x and alive')
 
                 else:
                     #not solved lets wait a minute and retry the fix
@@ -73,10 +72,8 @@ def valvecheck(sproeiklep):
                     #does it work?
                     valvecheckcode = connect(sproeiklep)
                     if valvecheckcode != '404':
-                        checkresult = 'Valves recovered 2x and alive'
+                        return(True,'Valves recovered 2x and alive')
                     else:
-                        checkresult = 'Valves in error even after fixing'
+                        return(False,'Valves in error even after fixing')
             else:
-                checkresult = 'Valves alive'
-
-        return(checkresult)
+                return(True,'Valves alive after retry')
