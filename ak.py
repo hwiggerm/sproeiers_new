@@ -67,9 +67,8 @@ while True:
 
             mysqldb.storedata(nicetime, tempin, oweer, tempsensor1)
 
-
-            valvecheckcode = ctrlvalves.valvecheck(sproeiklep)
-            logger.writeline('Valves status at '+ nicetime + ' ' + valvecheckcode)
+            returnstatus, returnmessage = ctrlvalves.valvecheck(sproeiklep)
+            logger.writeline('Valves status at '+ nicetime + ' ' + returnmessage)
 
     else:
         houraction = False
@@ -147,7 +146,7 @@ while True:
             # we kennen de sproeitijd obv temperatuur en gevallen regen.
             # als er gisteren gesproeid is en het <25 graden is dan hoeft er vandaag niet gesproeid te worden
 
-            if ysproei != 0:
+            if int(ysproei) != 0:
             #er is gisteren gesproeid dus vandaag hoeft niet tenzij de temp >25 graden is kies dan de berekende sproeitijd
                 logger.writeline('looks like ysproei was <> 0')
                 if weathersummary['ttemp'] >= 25:
@@ -208,8 +207,11 @@ while True:
         if not sprinklerstart:
             logger.writeline('Start Sprinkler')
             sprinklerstart = True
-            klepstatus = ctrlpump.startsproeier()
-            logger.writeline(klepstatus)
+            returnstatus, returnmessage = ctrlpump.startsproeier()
+            if returnstatus:
+                logger.writeline('Started '+ returnmessage)
+            else:
+                logger.writeline('Error '+ returnmessage)
     else:
         prinklerstart = False
 
@@ -217,8 +219,12 @@ while True:
     if alarm.alarmclock(sprinklermidtime) and sproeitijd>0:
         if not sprinklermid:
             sprinklermid = True
-            klepstatus = ctrlpump.sproeizwembad()
-            logger.writeline(klepstatus)
+            returnstatus, returnmessage = ctrlpump.sproeizwembad()
+            if returnstatus:
+                logger.writeline('Started '+ returnmessage)
+            else:
+                logger.writeline('Error '+ returnmessage)
+
     else:
         sprinklermid = False
 
@@ -226,7 +232,11 @@ while True:
     if alarm.alarmclock(sprinklerstoptime):
         if not sprinklerstop:
             sprinklerstop = True
-            klepstatus = ctrlpump.stopsproeier()
-            logger.writeline(klepstatus)
+            returnstatus, returnmessage = ctrlpump.stopsproeier()
+            if returnstatus:
+                logger.writeline('Stopped '+ returnmessage)
+            else:
+                logger.writeline('Error '+ returnmessage)
     else:
         sprinklerstop = False
+
