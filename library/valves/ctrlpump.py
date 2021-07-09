@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import time
 import os
 from library.valves import ctrlvalves
 
@@ -21,34 +22,40 @@ def pumpoff():
 
 
 def sproeituin():
-    if ctrlvalves.openvalve(klepsysteem,'tuinon'):
-        return('Proei  tuin')
+    returnstatus, returnmessage = ctrlvalves.openvalve(klepsysteem,'tuinon')
+    if returnstatus:
+        return('Sproei tuinkant' + returnmessage)
     else:
-        return('Error in switching tuin')
+        return('Error in switching tuinkant'+ returnmessage)
 
 def sproeizwembad():
-    if ctrlvalves.openvalve(klepsysteem,'zwembadon'):
-        return('Sproei zwembad')
+    returnstatus, returnmessage = ctrlvalves.openvalve(klepsysteem,'zwembadon')
+    if returnstatus:
+        return('Sproei zwembad' + returnmessage)
     else:
-        return('Error in switching zwembad')
+        return('Error in switching zwembad'+ returnmessage)
 
 def startsproeier():
-    if ctrlvalves.openvalve(klepsysteem,'tuinon'):
+    returnstatus, returnmessage = ctrlvalves.openvalve(klepsysteem,'tuinon')
+    if returnstatus:
         pumpon()
-        return('Sproei tuin')
+        return(True,'Sproei tuin' + returnmessage )
     else:
-        return('Pomp niet aan error is kleppen')
+        return(False,'Pomp niet aan error is kleppen' + returnmessage)
 
 def stopsproeier():
     pumpoff()
+    returnstatus, returnmessage = ctrlvalves.openvalve(klepsysteem,'poweroff')
 
-    if ctrlvalves.openvalve(klepsysteem,'poweroff'):
-        return('Run Poweroff')
+    if returnstatus:
+        return(True,'Poweroff executed'+ returnmessage)
     else:
         #error in switching
         time.sleep(10)
+
         #try again 
-        if ctrlvalves.openvalve(klepsysteem,'poweroff'):
-            return('Poweroff completed') 
+        returnstatus, returnmessage = ctrlvalves.openvalve(klepsysteem,'poweroff')
+        if returnstatus:
+            return(True,'Poweroff completed'+ returnmessage) 
         else:
-            return('Error in poweroff kleppen')
+            return(False,'Error in poweroff kleppen'+ returnmessage)
