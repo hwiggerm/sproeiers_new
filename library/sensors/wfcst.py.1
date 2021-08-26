@@ -19,54 +19,38 @@ def summarize():
   mysqlpw = os.environ.get('MYSQLPW')
   mysqldb = os.environ.get('MYSQLDB')
 
+  owm = OWM(owmkey)
+  mgr = owm.weather_manager()
+  one_call = mgr.one_call(lat=float(geolat), lon=float(geolon), exclude='minutely', units='metric')
+
   today = date.today()
   yesterday = today - timedelta(days = 1)
 
+  hourcount = 0
+  tt = 0
+  ht = 0
+  rt = 0
+  rainvalue = 0
 
-  try:
-      owm = OWM(owmkey)
-      mgr = owm.weather_manager()
-      one_call = mgr.one_call(lat=float(geolat), lon=float(geolon), exclude='minutely', units='metric')
+  while hourcount < 24:
+    hourcount += 1
 
-      hourcount = 0
-      tt = 0
-      ht = 0
-      rt = 0
+    #get forecast data from pypwm
+    temp = one_call.forecast_hourly[hourcount].temperature()
+    humid = one_call.forecast_hourly[hourcount].humidity
+    rain = one_call.forecast_hourly[hourcount].rain
+
+    if not rain:
       rainvalue = 0
+    else:
+      rainvalue = float(rain['1h'])
 
-      while hourcount < 24:
-          hourcount += 1
-
-          #get forecast data from pypwm
-          try:
-              temp = one_call.forecast_hourly[hourcount].temperature()
-              humid = one_call.forecast_hourly[hourcount].humidity
-              rain = one_call.forecast_hourly[hourcount].rain
-          except:
-              temp = 20
-              humid = 80
-              rain = 0
-
-          if not rain:
-            rainvalue = 0
-          else:
-            rainvalue = float(rain['1h'])
-
-          tt = tt + float(temp['temp'])
-          ht = ht + float(humid)
-          rt = rt + rainvalue
-
-      averageTemp = tt/hourcount
-      averageHumid = ht/hourcount
-
-  except:
-      averageTemp = 20
-      averageHumid = 80
-      rt = 0
-
+    tt = tt + float(temp['temp'])
+    ht = ht + float(humid)
+    rt = rt + rainvalue
 
   #what was the recorded weather yesterday
-
+  
   mydb = mysql.connector.connect(
     host="localhost",
     user=mysqlun,
@@ -77,7 +61,7 @@ def summarize():
   mycursor = mydb.cursor()
   mycursor.execute("SELECT * FROM logweather")
   myresult = mycursor.fetchall()
-
+  
   v=0
   t=0
   h=0
@@ -96,19 +80,16 @@ def summarize():
 
         if x[5] != 'None':
           r = r + float(x[5])
-    if hourcountdb == 0:
-      hourcountdb = 1
-
 
   weather = {
     "logdate": str(today),
     "ytemp": t/hourcountdb,
     "yhum": h/hourcountdb,
     "yrain": r,
-    "ttemp": averageTemp,
-    "thum": averageHumid,
+    "ttemp": tt/hourcount,
+    "thum": ht/hourcount,
     "train": rt,
     "sproeitijd": 60,
     "sunrise": '' }
-
+    
   return(weather)

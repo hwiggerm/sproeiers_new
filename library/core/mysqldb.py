@@ -54,9 +54,37 @@ def getyesterdaysprinkler():
     )
 
     mycursor = mydb.cursor()
- 
-    query = "select sproeitijd from weerinfo order by timestamp desc LIMIT 1,1"
+
+    query = 'select convert(sproeitijd,UNSIGNED INTEGER)  as sproeitijd from weerinfo order by timestamp desc LIMIT 1'
 
     mycursor.execute(query)
     return(mycursor.fetchone() )
 
+def getyesterdaysforecast():
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user=mysqlun,
+    password=mysqlpw,
+    database=mysqldb,
+    )
+
+    mycursor = mydb.cursor()
+    query = "select * from weerinfo order by timestamp desc LIMIT 1"
+
+    mycursor.execute(query)
+    return(mycursor.fetchone() )
+
+
+def getlastweather():
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user=mysqlun,
+    password=mysqlpw,
+    database=mysqldb,
+    )
+
+    mycursor = mydb.cursor()
+    query = "select * from logweather order by logdate desc LIMIT 1"
+
+    mycursor.execute(query)
+    return(mycursor.fetchone() )

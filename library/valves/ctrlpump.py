@@ -76,7 +76,7 @@ def adhocsproei(sproeitijd):
 
     returnstatus, returnmessage = startsproeier()
     if returnstatus:
-        print('A: Start met de tuin '+ returnmessage )
+        print('A: Start met de tuin '+ returnmessage)
     else:
         return(False, 'A: Foutje '+ returnmessage)
 
@@ -86,13 +86,13 @@ def adhocsproei(sproeitijd):
 
     returnstatus, returnmessage = sproeizwembad()
     if returnstatus:
-        print('A: Over naar het zwembad '+ returnmessage )
+        print('A: Over naar het zwembad '+ returnmessage)
     else:
         return(False, 'A: Foutje '+ returnmessage)
 
     time.sleep((sproeitijd*60)/2)
 
-    returnstatus, returnmessage = ctrlpump.stopsproeier()
+    returnstatus, returnmessage = stopsproeier()
     if returnstatus:
         print('A: Klaar met sproeien '+ returnmessage )
     else:
