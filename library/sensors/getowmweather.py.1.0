@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import glob
-import time
 from pyowm.owm import OWM
 import os
 
@@ -12,17 +11,13 @@ geolon = os.environ.get('GEOLON')
 from datetime import datetime
 
 
-def readowm():
+def read_weather():
 
     try:
         owm = OWM(owmkey)
         mgr = owm.weather_manager()
         observation = mgr.weather_at_place(geolocation)
         one_call = mgr.one_call(lat=float(geolat), lon=float(geolon))
-
-        weather = observation.weather
-        rain_dict = weather.rain
-        temp_dict_celsius = weather.temperature('celsius')
 
         humidity = one_call.current.humidity
         weather = observation.weather
@@ -44,7 +39,7 @@ def readowm():
           "sunset": sunrset_iso,
           "sunrise": sunrise_iso,
           "humidity": humidity }
-
+          
     except:
         weatherreport = {
           "outsidetemp": 0,
@@ -55,27 +50,7 @@ def readowm():
           "sunrise": 0,
           "humidity": 0 }
 
-
-    print('readowm')
-    print(weatherreport)
-
     return(weatherreport)
-
-def read_weather():
-
-    oweer = readowm()
-    print('1')
-    print(oweer)
-
-    if oweer['sunrise'] == 0:
-        time.sleep(5)
-        oweer = readowm()
-
-        if oweer['sunrise'] == 0:
-            time.sleep(5)
-            oweer = readowm()
-
-    return(oweer)
 
 
 

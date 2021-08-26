@@ -42,8 +42,11 @@ def handle(msg):
         weersummary = mysqldb.getlastweather()
         bot.sendMessage(chat_id, 'Timestamp : ' + str(weersummary[0]) + '\n' +  'Temp Schuur: ' + str(weersummary[1]) + '\n' +  'Temp buiten : ' + str(weersummary[2]) + '\n' +  'Het weer : ' + str(weersummary[3])  + '\n' + 'Vocht : ' + str(weersummary[4])  + '\n' + 'Regen komend uur : ' + str(weersummary[5])+ '\n' + 'Temp tuin : ' + str(weersummary[7]) )
     elif command == '/sproei':
-        returnstatus, returnmessage = ctrlpump.adhocsproei(5)
+        returnstatus, returnmessage = ctrlpump.adhocsproei(50)
         bot.sendMessage(chat_id, 'Sproeien!! ' + returnmessage )
+    elif command == '/stop':
+        returnstatus, returnmessage = ctrlpump.stopsproeier()
+        bot.sendMessage(chat_id, 'Stop' + returnmessage )
 
 bot = telepot.Bot(botid)
 

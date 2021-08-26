@@ -44,12 +44,13 @@ sprinklermidtime = dt.now()
 sprinklerstoptime = dt.now()
 
 while True:
-
+    time.sleep(5)
     if alarm.hoursign():
         if not houraction:
-            print('hourcheck')
             now = datetime.datetime.now()
             nicetime = now.strftime("%Y-%m-%d %H:%M:%S")
+
+            logger.writeline('Hourcheck' + nicetime)
 
             houraction = True
 
@@ -86,13 +87,13 @@ while True:
 
             #timeshift for testing so that we 'see' the clicks in the morning.
             #will be 0 wne in production
-            timedelta =  4   #in hours
+            timedelta =  4   #in hours 4=2hours utc->CET + 2 randomw hours
 
             #delta between set time and start the sprinkler
             mindelta  =  0
 
             ysproeilist = mysqldb.getyesterdaysprinkler()
-            ysproei = ysproeilist[0]
+            ysproei = int(ysproeilist[0])
 
             logger.writeline('Sproeitijd Gisteren : ' + str(ysproei)  )
 
@@ -146,7 +147,7 @@ while True:
             # we kennen de sproeitijd obv temperatuur en gevallen regen.
             # als er gisteren gesproeid is en het <25 graden is dan hoeft er vandaag niet gesproeid te worden
 
-            if int(ysproei) != 0:
+            if ysproei != 0:
             #er is gisteren gesproeid dus vandaag hoeft niet tenzij de temp >25 graden is kies dan de berekende sproeitijd
                 logger.writeline('looks like ysproei was <> 0')
                 if weathersummary['ttemp'] >= 25:
@@ -189,8 +190,8 @@ while True:
             if not firstrun:
                 mysqldb.storeweather(weathersummary)
 
-            #pause for 60 seconds to avoid the forecast is triggered for a second time
-            time.sleep(60)
+            #pause for 120 seconds to avoid the forecast is triggered for a second time
+            time.sleep(120)
             weathersummary.clear()
 
             #after the init set the flags the the following routines
